@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example.pravega'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile "junit:junit:${junitVersion}"
+
+    compile "io.pravega:pravega-client:${pravegaVersion}",
+            "io.pravega:pravega-common:${pravegaVersion}",
+            "commons-cli:commons-cli:${commonsCLIVersion}",
+            "org.slf4j:slf4j-api:1.7.14",
+            "ch.qos.logback:logback-classic:1.1.7"
+
+    // https://projectlombok.org
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}
