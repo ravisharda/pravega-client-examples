@@ -9,7 +9,7 @@ You may obtain a copy of the License at
     http://www.apache.org/licenses/LICENSE-2.0
 -->
 <configuration scan="true">
-    <logger name="org.example.pravega.apps" level="INFO"/>
+    <logger name="org.example.pravegaclientsamples" level="INFO"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
