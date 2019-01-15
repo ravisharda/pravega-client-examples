@@ -19,17 +19,13 @@ public class Reader extends Client {
         super(scope, streamName, controllerURI);
     }
 
-    public Reader (String scope, String streamName, URI controllerURI, boolean tlsEnabled,
-                   String trustStoreLocation) {
+    public Reader (String scope, String streamName, URI controllerURI, String trustStoreLocation) {
         super(scope, streamName, controllerURI, true, trustStoreLocation);
     }
 
-    public Reader(String scope, String streamName, URI controllerURI, boolean authEnabled,
-                  String userName, String password) {
-        super(scope, streamName, controllerURI,
-                false, userName, password);
+    public Reader(String scope, String streamName, URI controllerURI, String userName, String password) {
+        super(scope, streamName, controllerURI, false, userName, password);
     }
-
 
     public void readAndPrintAllEvents () {
 

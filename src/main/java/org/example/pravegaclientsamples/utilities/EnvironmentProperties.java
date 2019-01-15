@@ -6,7 +6,6 @@ public class EnvironmentProperties {
 
     public static String defaultControllerUri() {
         return defaultControllerUri(false);
-
     }
 
     public static String defaultControllerUri(boolean tlsEnabled) {
@@ -19,5 +18,13 @@ public class EnvironmentProperties {
 
     public static String controllerUri(@NonNull String protocol, @NonNull String controllerIp, int port) {
         return String.format("%s://%s:%d", protocol, controllerIp, port);
+    }
+
+    public static String defaultRestUri() {
+        return restUri("http", "localhost", 9091);
+    }
+
+    public static String restUri(String protocol, String serverIp, int restPort) {
+        return String.format("%s://%s:%d", protocol, serverIp, restPort);
     }
 }

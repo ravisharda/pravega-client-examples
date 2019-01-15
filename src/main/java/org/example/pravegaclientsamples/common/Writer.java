@@ -17,15 +17,12 @@ public class Writer extends Client {
         super(scope, streamName, controllerURI);
     }
 
-    public Writer (String scope, String streamName, URI controllerURI, boolean tlsEnabled,
-                   String trustStoreLocation) {
+    public Writer (String scope, String streamName, URI controllerURI, String trustStoreLocation) {
         super(scope, streamName, controllerURI, true, trustStoreLocation);
     }
 
-    public Writer(String scope, String streamName, URI controllerURI, boolean authEnabled,
-                  String userName, String password) {
-        super(scope, streamName, controllerURI,
-                false, userName, password);
+    public Writer(String scope, String streamName, URI controllerURI, String userName, String password) {
+        super(scope, streamName, controllerURI, true, userName, password);
     }
 
     public void writeEvent(String routingKey, String message) {

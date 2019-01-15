@@ -24,8 +24,7 @@ public class TlsReaderWriterTests {
         String trustStoreFilePath = FileUtils.absolutePathOfFileInClasspath("cert.pem");
 
         // Write events to stream
-        Writer writer = new Writer(scope, streamName, URI.create(controllerUri),
-                true, trustStoreFilePath);
+        Writer writer = new Writer(scope, streamName, URI.create(controllerUri), trustStoreFilePath);
 
         String message1 = "message 1";
         writer.writeEvent(routingKey, message1);
@@ -38,8 +37,7 @@ public class TlsReaderWriterTests {
                 message2, routingKey, scope, streamName);
 
         // Now, read the events and print them to logs
-        Reader reader = new Reader(scope, streamName, URI.create(controllerUri),
-            true, trustStoreFilePath);
+        Reader reader = new Reader(scope, streamName, URI.create(controllerUri), trustStoreFilePath);
         reader.readAndPrintAllEvents();
         //log.info("Done reading all events");
     }

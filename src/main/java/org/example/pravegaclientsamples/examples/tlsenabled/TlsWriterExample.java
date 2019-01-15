@@ -9,14 +9,11 @@ import io.pravega.client.stream.ScalingPolicy;
 import io.pravega.client.stream.StreamConfiguration;
 import io.pravega.client.stream.impl.JavaSerializer;
 import lombok.Cleanup;
+import org.example.pravegaclientsamples.utilities.FileUtils;
 
 import java.net.URI;
 
 public class TlsWriterExample {
-
-    static {
-        // SslVerificationDisabler.disableSslVerification();
-    }
 
     private static final int READER_TIMEOUT_MS = 2000;
 
@@ -26,10 +23,9 @@ public class TlsWriterExample {
         int numSegments = 10;
         URI controllerURI = URI.create("tls://localhost:9090");
 
-
         ClientConfig clientConfig = ClientConfig.builder()
                 .controllerURI(controllerURI)
-                .trustStore("/home/rsharda/my-pravega-apps/src/main/resources/cert.pem")
+                .trustStore(FileUtils.absolutePathOfFileInClasspath("cert.pem"))
                 .validateHostName(false)
                 .build();
         System.out.println("Done creating client config");
@@ -48,29 +44,17 @@ public class TlsWriterExample {
                         .build());
         System.out.println("Created stream: " + streamName);
 
-        try (ClientFactory clientFactory = ClientFactory.withScope(scope, clientConfig);
-            EventStreamWriter<String> writer = clientFactory.createEventWriter(streamName,
-                     new JavaSerializer<String>(),
-                     EventWriterConfig.builder().build())) {
-            System.out.println("Got a writer");
+        @Cleanup
+        ClientFactory clientFactory = ClientFactory.withScope(scope, clientConfig);
 
-            writer.writeEvent("Hello-1");
-            writer.writeEvent("Hello-2");
-            System.out.println("Wrote data to the stream");
-        }
-
-
-        /*
-        EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(scope, clientConfig);
+        @Cleanup
         EventStreamWriter<String> writer = clientFactory.createEventWriter(streamName,
                 new JavaSerializer<String>(),
                 EventWriterConfig.builder().build());
-        log.info("Created writer for stream: " + streamName);
+        System.out.println("Got a writer");
 
-        writer.writeEvent("hello").get();
-
-        */
-
-
+        writer.writeEvent("Hello-1");
+        writer.writeEvent("Hello-2");
+        System.out.println("Wrote data to the stream");
     }
 }

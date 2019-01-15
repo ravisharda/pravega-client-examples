@@ -37,9 +37,7 @@ public class Connection {
         }
 
         if (isTlsEnabled) {
-            clientConfigBuilder
-                    .trustStore(trustStoreLocation)
-                    .trustStore(trustStoreLocation).validateHostName(false);
+            clientConfigBuilder.trustStore(trustStoreLocation).validateHostName(false);
         }
 
         this.clientConfig = clientConfigBuilder.build();

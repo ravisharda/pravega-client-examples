@@ -14,13 +14,11 @@ public class BasicReaderWriterTests {
 
     @Test
     public void writeEventsThenReadAndPrintThem() {
-
         String controllerUri = EnvironmentProperties.defaultControllerUri();
         String scope = "org.example";
         String streamName = "testStream";
         String routingKey = "testRoutingKey";
         log.info("Controller Uri: {}", controllerUri);
-
 
         Writer writer = new Writer(scope, streamName, URI.create(controllerUri));
 

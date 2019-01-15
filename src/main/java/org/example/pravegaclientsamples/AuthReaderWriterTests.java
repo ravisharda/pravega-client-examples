@@ -14,16 +14,14 @@ public class AuthReaderWriterTests {
     // Not working yet.
     @Test
     public void writeEventsThenReadAndPrintThem() {
-
         String controllerUri = EnvironmentProperties.defaultControllerUri();
         String scope = "org.example";
         String streamName = "testStream";
         String routingKey = "testRoutingKey";
         log.info("Controller Uri: {}", controllerUri);
 
-
         Writer writer = new Writer(scope, streamName, URI.create(controllerUri),
-                true, "admin", "1111_aaaa");
+                "admin", "1111_aaaa");
 
         String message1 = "message 1";
         writer.writeEvent(routingKey, message1);
@@ -36,7 +34,7 @@ public class AuthReaderWriterTests {
                 message2, routingKey, scope, streamName));
 
         Reader reader = new Reader(scope, streamName, URI.create(controllerUri),
-                true, "admin", "1111_aaaa");
+                "admin", "1111_aaaa");
         reader.readAndPrintAllEvents();
     }
 }

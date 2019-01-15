@@ -7,6 +7,7 @@ import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.JavaSerializer;
 import lombok.Cleanup;
+import org.example.pravegaclientsamples.utilities.FileUtils;
 
 import java.net.URI;
 import java.util.UUID;
@@ -23,10 +24,9 @@ public class TlsReaderExample {
         //URI controllerURI = URI.create("tls://192.168.224.141:9090");
         URI controllerURI = URI.create("tls://localhost:9090");
 
-
         ClientConfig clientConfig = ClientConfig.builder()
                 .controllerURI(controllerURI)
-                .trustStore("/home/rsharda/my-pravega-apps/src/main/resources/cert.pem")
+                .trustStore(FileUtils.absolutePathOfFileInClasspath("cert.pem"))
                 .validateHostName(false)
                 .build();
 
@@ -44,36 +44,37 @@ public class TlsReaderExample {
                 .build());
         System.out.println("Created stream: " + streamName);
 
-
         final String readerGroup = UUID.randomUUID().toString().replace("-", "");
         final ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
                 .stream(Stream.of(scope, streamName))
                 .build();
 
-        try (ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(scope, clientConfig)) {
-            readerGroupManager.createReaderGroup(readerGroup, readerGroupConfig);
-        }
+        @Cleanup
+        ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(scope, clientConfig);
+        readerGroupManager.createReaderGroup(readerGroup, readerGroupConfig);
 
-        try (ClientFactory clientFactory = ClientFactory.withScope(scope, clientConfig);
-             EventStreamReader<String> reader = clientFactory.createReader("reader",
-                     readerGroup,
-                     new JavaSerializer<String>(),
-                     ReaderConfig.builder().build())) {
-            System.out.format("Reading all the events from %s/%s%n", scope, streamName);
-            EventRead<String> event = null;
-            do {
-                try {
-                    event = reader.readNextEvent(READER_TIMEOUT_MS);
-                    if (event.getEvent() != null) {
-                        System.out.format("Read event '%s'%n", event.getEvent());
-                    }
-                } catch (ReinitializationRequiredException e) {
-                    //There are certain circumstances where the reader needs to be reinitialized
-                    e.printStackTrace();
+        @Cleanup
+        ClientFactory clientFactory = ClientFactory.withScope(scope, clientConfig);
+
+        @Cleanup
+        EventStreamReader<String> reader = clientFactory.createReader("reader",
+                readerGroup,
+                new JavaSerializer<String>(),
+                ReaderConfig.builder().build());
+        System.out.format("Reading all the events from %s/%s%n", scope, streamName);
+
+        EventRead<String> event = null;
+        do {
+            try {
+                event = reader.readNextEvent(READER_TIMEOUT_MS);
+                if (event.getEvent() != null) {
+                    System.out.format("Read event '%s'%n", event.getEvent());
                 }
-            } while (event.getEvent() != null);
-            System.out.format("No more events from %s/%s%n", scope, streamName);
-        }
-
+            } catch (ReinitializationRequiredException e) {
+                // there are certain circumstances where the reader needs to be reinitialized
+                e.printStackTrace();
+            }
+        } while (event.getEvent() != null);
+        System.out.format("No more events from %s/%s%n", scope, streamName);
     }
 }
