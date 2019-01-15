@@ -10,7 +10,7 @@ import org.example.pravegaclientsamples.utilities.EnvironmentProperties;
 import java.net.URI;
 
 @Slf4j
-public class BasicReaderWriterTests {
+public class NoAuthAndPlaintextReaderWriterTests {
 
     @Test
     public void writeEventsThenReadAndPrintThem() {
