@@ -21,7 +21,7 @@ public class TlsReaderExample {
         String scope = "tls";
         String streamName = "stream1";
         int numSegments = 10;
-        //URI controllerURI = URI.create("tls://192.168.224.141:9090");
+
         URI controllerURI = URI.create("tls://localhost:9090");
 
         ClientConfig clientConfig = ClientConfig.builder()
