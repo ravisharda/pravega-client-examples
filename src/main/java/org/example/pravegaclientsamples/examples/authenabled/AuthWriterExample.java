@@ -14,8 +14,9 @@ import lombok.Cleanup;
 import java.net.URI;
 
 public class AuthWriterExample {
+
     public static void main(String... args) {
-        String scope = "auth";
+        String scope = "org.example.auth";
         String streamName = "stream1";
         int numSegments = 10;
         URI controllerURI = URI.create("tcp://localhost:9090");

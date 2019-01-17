@@ -17,8 +17,7 @@ public class AuthReaderExample {
     private static final int READER_TIMEOUT_MS = 2000;
 
     public static void main(String... args) {
-
-        String scope = "auth";
+        String scope = "org.example.auth";
         String streamName = "stream1";
         int numSegments = 10;
 
