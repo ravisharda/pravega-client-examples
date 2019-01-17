@@ -8,6 +8,7 @@ version '1.0-SNAPSHOT'
 sourceCompatibility = 1.8
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -16,8 +17,8 @@ dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-    compile "io.pravega:pravega-client:${pravegaVersion}",
-            "io.pravega:pravega-common:${pravegaVersion}",
+    compile "io.pravega:pravega-client:${pravegaVersion}+",
+            "io.pravega:pravega-common:${pravegaVersion}+",
             "commons-cli:commons-cli:${commonsCLIVersion}",
             "org.slf4j:slf4j-api:${slf4jApiVersion}",
             "ch.qos.logback:logback-classic:${logbackVersion}",
