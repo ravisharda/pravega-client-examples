@@ -2,7 +2,6 @@ package org.example.pravegaclientsamples.common;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import org.apache.commons.lang3.StringUtils;
 
 import java.net.URI;
 
@@ -31,10 +30,5 @@ public class Client {
         this.connection = new Connection(scope, streamName, controllerURI,
                 authEnabled, userName, password,
                 false, null);
-    }
-
-    public static void main(String[] args) {
-        //Client client = new Client(null, null, null);
-        //client.connection
     }
 }
