@@ -15,8 +15,6 @@ import java.net.URI;
 
 public class TlsWriterExample {
 
-    private static final int READER_TIMEOUT_MS = 2000;
-
     public static void main(String... args) {
         String scope = "tls";
         String streamName = "stream1";
@@ -34,8 +32,6 @@ public class TlsWriterExample {
         StreamManager streamManager = StreamManager.create(clientConfig);
         System.out.println("Created a stream manager");
 
-        // A Stream is created in the context of a Scope; the Scope acts as a namespace mechanism so
-        // that different sets of Streams can be categorized for some purpose.
         streamManager.createScope(scope);
         System.out.println("Created a scope: " + scope);
 
