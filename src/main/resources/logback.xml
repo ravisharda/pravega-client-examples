@@ -9,29 +9,44 @@ You may obtain a copy of the License at
     http://www.apache.org/licenses/LICENSE-2.0
 -->
 <configuration scan="true">
+    <!-- Insert the current time formatted as "yyyyMMdd'T'HHmmss" under
+    the key "bySecond" into the logger context. This value will be
+    available to all subsequent configuration elements. -->
+    <timestamp key="bySecond" datePattern="HHmmss-yyyyMMdd"/>
+
     <logger name="org.example.pravegaclientsamples" level="INFO"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <charset>UTF-8</charset>
-            <Pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg%n</Pattern>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36}.%M\(%line\) - %msg%n</Pattern>
         </encoder>
     </appender>
 
+    <!--
     <appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <!-- file property left unset/blank -->
+
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>/home/rsharda/logs/pravega.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>/home/rsharda/logs/client/pravega.%d{yyyy-MM-dd}.log</fileNamePattern>
         </rollingPolicy>
 
         <encoder>
-            <!--<pattern>%relative [%thread] %level %logger - %msg%n</pattern>-->
             <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n</pattern>
         </encoder>
     </appender>
+    -->
 
-    <root level="ERROR">
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>~/logs/client/${bySecond}.log</file>
+        <append>true</append>
+        <encoder>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36}.%M\(%line\) - %msg%n</Pattern>
+        </encoder>
+    </appender>
+
+    <root level="DEBUG">
         <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
     </root>
 
 
