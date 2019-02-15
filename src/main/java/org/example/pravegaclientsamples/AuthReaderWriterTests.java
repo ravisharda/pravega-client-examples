@@ -11,13 +11,26 @@ import java.net.URI;
 @Slf4j
 public class AuthReaderWriterTests {
 
-    // Not working yet.
+    @Test
+    public void writeWithoutProperCredentialsFails() {
+        String controllerUri = EnvironmentProperties.defaultControllerUri();
+        String scope = "org.example";
+        String streamName = "testStreamAuth";
+        String routingKey = "testRoutingKeyAuth";
+        log.info("Controller Uri: {}", controllerUri);
+
+        Writer writer = new Writer(scope, streamName, URI.create(controllerUri),
+                "random", "random");
+        writer.writeEvent(routingKey, "whatever");
+    }
+
+    // Working yet.
     @Test
     public void writeEventsThenReadAndPrintThem() {
         String controllerUri = EnvironmentProperties.defaultControllerUri();
         String scope = "org.example";
-        String streamName = "testStream";
-        String routingKey = "testRoutingKey";
+        String streamName = "testStreamAuth";
+        String routingKey = "testRoutingKeyAuth";
         log.info("Controller Uri: {}", controllerUri);
 
         Writer writer = new Writer(scope, streamName, URI.create(controllerUri),
@@ -37,4 +50,19 @@ public class AuthReaderWriterTests {
                 "admin", "1111_aaaa");
         reader.readAndPrintAllEvents();
     }
+
+    @Test
+    public void readPreviousEventsAndPrintThem() {
+        String controllerUri = EnvironmentProperties.defaultControllerUri();
+        String scope = "org.example";
+        String streamName = "testStreamAuth";
+        String routingKey = "testRoutingKeyAuth";
+        log.info("Controller Uri: {}", controllerUri);
+
+        Reader reader = new Reader(scope, streamName, URI.create(controllerUri),
+                "admin", "1111_aaaa");
+        reader.readAndPrintAllEvents();
+    }
+
+
 }
