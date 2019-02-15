@@ -23,7 +23,7 @@ public class TlsWriterExample {
 
         ClientConfig clientConfig = ClientConfig.builder()
                 .controllerURI(controllerURI)
-                .trustStore(FileUtils.absolutePathOfFileInClasspath("cert.pem"))
+                .trustStore(FileUtils.absolutePathOfFileInClasspath("cert2.pem"))
                 .validateHostName(false)
                 .build();
         System.out.println("Done creating client config");
