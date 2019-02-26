@@ -24,7 +24,6 @@ public class AuthReaderWriterTests {
         writer.writeEvent(routingKey, "whatever");
     }
 
-    // Working yet.
     @Test
     public void writeEventsThenReadAndPrintThem() {
         String controllerUri = EnvironmentProperties.defaultControllerUri();
