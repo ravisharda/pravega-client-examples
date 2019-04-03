@@ -19,6 +19,7 @@ dependencies {
 
     compile "io.pravega:pravega-client:${pravegaVersion}+",
             "io.pravega:pravega-common:${pravegaVersion}+",
+            "io.pravega:pravega-standalone:${pravegaVersion}+",
             "commons-cli:commons-cli:${commonsCLIVersion}",
             "org.slf4j:slf4j-api:${slf4jApiVersion}",
             "ch.qos.logback:logback-classic:${logbackVersion}",

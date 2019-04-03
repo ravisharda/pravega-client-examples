@@ -3,6 +3,8 @@ package org.example.inprocclustersamples;
 import io.pravega.local.InProcPravegaCluster;
 import lombok.extern.slf4j.Slf4j;
 
+import static org.example.pravegaclientsamples.utilities.FileUtils.absolutePathOfFileInClasspath;
+
 @Slf4j
 public class NoSecurityInProcClusterExample {
     public static void main (String... args) throws Exception {
@@ -14,16 +16,25 @@ public class NoSecurityInProcClusterExample {
                 .isInMemStorage(true)
                 .isInProcController(true)
                 .controllerCount(1)
+                .enableRestServer(true)
                 .restServerPort(9091)
                 .isInProcSegmentStore(true)
                 .segmentStoreCount(1)
                 .containerCount(4)
                 .enableTls(false)
                 .enableAuth(false)
+                .keyFile(absolutePathOfFileInClasspath("pravega/standalone/key.pem"))
+                .certFile(absolutePathOfFileInClasspath("pravega/standalone/cert.pem"))
+                .userName("")
+                .passwd("1111_aaaa")
+                .passwdFile(absolutePathOfFileInClasspath("pravega/standalone/passwd"))
+                .jksKeyFile(absolutePathOfFileInClasspath("pravega/standalone/standalone.keystore.jks"))
+                .jksTrustFile(absolutePathOfFileInClasspath("pravega/standalone/standalone.truststore.jks"))
+                .keyPasswordFile(absolutePathOfFileInClasspath("pravega/standalone/standalone.keystore.jks.passwd"))
                 .build();
 
        inProcCluster.setControllerPorts(new int[]{9090});
-       inProcCluster.setControllerPorts(new int[]{6060});
+       inProcCluster.setSegmentStorePorts(new int[]{6000});
 
        log.info("Starting in-proc Cluster...");
        inProcCluster.start();
