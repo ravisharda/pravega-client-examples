@@ -38,7 +38,7 @@ import static org.example.pravega.common.FileUtils.absolutePathOfFileInClasspath
 import static org.junit.Assert.assertEquals;
 
 @Slf4j
-public class BatchClient {
+public class BatchClientTests {
 
     //private static final int READ_TIMEOUT = 1000;
 
