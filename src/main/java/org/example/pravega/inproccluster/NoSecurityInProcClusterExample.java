@@ -1,16 +1,15 @@
-package org.example.inprocclustersamples;
+package org.example.pravega.inproccluster;
 
 import io.pravega.local.InProcPravegaCluster;
 import lombok.extern.slf4j.Slf4j;
 
-import static org.example.pravegaclientsamples.utilities.FileUtils.*;
+import static org.example.pravega.client.driver.utilities.FileUtils.absolutePathOfFileInClasspath;
 
 @Slf4j
-public class SecurityEnabledClusterExample {
-
+public class NoSecurityInProcClusterExample {
     public static void main (String... args) throws Exception {
 
-        InProcPravegaCluster inProcCluster = InProcPravegaCluster.builder()
+       InProcPravegaCluster inProcCluster = InProcPravegaCluster.builder()
                 .isInProcZK(true)
                 .zkUrl("localhost:" + 4000)
                 .zkPort(4000)
@@ -22,11 +21,11 @@ public class SecurityEnabledClusterExample {
                 .isInProcSegmentStore(true)
                 .segmentStoreCount(1)
                 .containerCount(4)
-                .enableTls(true)
-                .enableAuth(true)
+                .enableTls(false)
+                .enableAuth(false)
                 .keyFile(absolutePathOfFileInClasspath("pravega/standalone/key.pem"))
                 .certFile(absolutePathOfFileInClasspath("pravega/standalone/cert.pem"))
-                .userName("admin")
+                .userName("")
                 .passwd("1111_aaaa")
                 .passwdFile(absolutePathOfFileInClasspath("pravega/standalone/passwd"))
                 .jksKeyFile(absolutePathOfFileInClasspath("pravega/standalone/standalone.keystore.jks"))
@@ -34,23 +33,23 @@ public class SecurityEnabledClusterExample {
                 .keyPasswordFile(absolutePathOfFileInClasspath("pravega/standalone/standalone.keystore.jks.passwd"))
                 .build();
 
-        inProcCluster.setControllerPorts(new int[]{9090});
-        inProcCluster.setSegmentStorePorts(new int[]{6000});
+       inProcCluster.setControllerPorts(new int[]{9090});
+       inProcCluster.setSegmentStorePorts(new int[]{6000});
 
-        log.info("Starting in-proc Cluster...");
-        inProcCluster.start();
-        log.info("Done starting in-proc Cluster.");
+       log.info("Starting in-proc Cluster...");
+       inProcCluster.start();
+       log.info("Done starting in-proc Cluster.");
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                log.info("Shutdown Hook is running...");
-                try {
-                    inProcCluster.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        log.info("Application terminating...");
+       Runtime.getRuntime().addShutdownHook(new Thread() {
+           public void run() {
+               log.info("Shutdown Hook is running...");
+               try {
+                   inProcCluster.close();
+               } catch (Exception e) {
+                   e.printStackTrace();
+               }
+           }
+       });
+       log.info("Application terminating...");
     }
 }
