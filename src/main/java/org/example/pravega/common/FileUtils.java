@@ -1,4 +1,4 @@
-package org.example.pravega.client.driver.utilities;
+package org.example.pravega.common;
 
 import lombok.NonNull;
 

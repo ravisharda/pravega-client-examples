@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.pravega.client.driver.common.Reader;
 import org.example.pravega.client.driver.common.Writer;
 import org.example.pravega.client.driver.utilities.EnvironmentProperties;
-import org.example.pravega.client.driver.utilities.FileUtils;
+import org.example.pravega.common.FileUtils;
 import org.junit.Test;
 
 import java.net.URI;

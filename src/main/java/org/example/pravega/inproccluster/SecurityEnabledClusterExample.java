@@ -3,7 +3,7 @@ package org.example.pravega.inproccluster;
 import io.pravega.local.InProcPravegaCluster;
 import lombok.extern.slf4j.Slf4j;
 
-import static org.example.pravega.client.driver.utilities.FileUtils.*;
+import static org.example.pravega.common.FileUtils.*;
 
 @Slf4j
 public class SecurityEnabledClusterExample {
