@@ -12,10 +12,15 @@ repositories {
     mavenCentral()
 }
 
+allprojects {
+    apply plugin: "idea"
+    apply plugin: "eclipse"
+}
+
 dependencies {
     // https://projectlombok.org
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
-    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    //annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     compile "io.pravega:pravega-client:${pravegaVersion}+",
             "io.pravega:pravega-common:${pravegaVersion}+",
