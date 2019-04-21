@@ -1,4 +1,4 @@
-package org.example.pravega.client.examples.tlsenabled;
+package org.example.pravega.client.basicreadwrite.tlsenabled;
 
 import io.pravega.client.ClientConfig;
 import io.pravega.client.ClientFactory;

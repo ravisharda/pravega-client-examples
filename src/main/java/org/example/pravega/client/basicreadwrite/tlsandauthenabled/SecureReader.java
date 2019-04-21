@@ -1,17 +1,14 @@
-package org.example.pravega.client.examples.tlsandauthenabled;
+package org.example.pravega.client.basicreadwrite.tlsandauthenabled;
 
 import io.pravega.client.ClientConfig;
 import io.pravega.client.ClientFactory;
-import io.pravega.client.admin.StreamManager;
-import io.pravega.client.stream.EventStreamWriter;
-import io.pravega.client.stream.EventWriterConfig;
-import io.pravega.client.stream.ScalingPolicy;
-import io.pravega.client.stream.StreamConfiguration;
+import io.pravega.client.admin.ReaderGroupManager;
+import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.DefaultCredentials;
 import io.pravega.client.stream.impl.JavaSerializer;
 
 /**
- * This class demonstrates how to configure a Pravega writer application for:
+ * This class demonstrates how to configure a Pravega reader application for:
  *
  *    a) SSL/TLS (HTTPS) communications with a Pravega cluster for data-in-transit encryption and
  *       server authentication.
@@ -20,9 +17,9 @@ import io.pravega.client.stream.impl.JavaSerializer;
  * This example can be driven interactively against a running Pravega cluster configured to communicate using SSL/TLS
  * and "auth" (authentication and authorization) turned on.
  */
-public class SecureWriter {
+public class SecureReader {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ReinitializationRequiredException {
 
         /**
          * Note about setting the client config for HTTPS:
@@ -49,47 +46,41 @@ public class SecureWriter {
                 .validateHostName(false)                 // SSL-related client-side configuration
                 .credentials(new DefaultCredentials("1111_aaaa", "admin")) // Auth-related client-side configuration
                 .build();
+        System.out.println("Done creating a client config.");
 
-        // Everything below depicts the usual flow of writing events. All client-side security configuration is
+        // Everything below depicts the usual flow of reading events. All client-side security configuration is
         // done through the ClientConfig object as shown above.
 
-        System.out.println("Done creating client config.");
-
-        StreamManager streamManager = null;
         ClientFactory clientFactory = null;
-        EventStreamWriter<String> writer = null;
-
+        ReaderGroupManager readerGroupManager = null;
+        EventStreamReader<String> reader = null;
         try {
-            streamManager = StreamManager.create(clientConfig);
-            System.out.println("Done creating a stream manager.");
-
-            streamManager.createScope(Constants.SCOPE);
-            System.out.println("Done creating a scope with the specified name: [" + Constants.SCOPE + "].");
-
-            StreamConfiguration streamConfig = StreamConfiguration.builder()
-                    .scalingPolicy(ScalingPolicy.fixed(Constants.NO_OF_SEGMENTS))
+            ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
+                    .stream(Stream.of(Constants.SCOPE, Constants.STREAM_NAME))
+                    .disableAutomaticCheckpoints()
                     .build();
-            System.out.println("Done creating a stream configuration.");
+            System.out.println("Done creating a reader group config with specified scope: [" +
+                    Constants.SCOPE +"] and stream name: [" + Constants.STREAM_NAME + "].");
 
-            streamManager.createStream(Constants.SCOPE, Constants.STREAM_NAME, streamConfig);
-            System.out.println("Done creating a stream with the specified name: [" + Constants.STREAM_NAME
-                    + "] and stream configuration.");
+            readerGroupManager = ReaderGroupManager.withScope(Constants.SCOPE, clientConfig);
+            readerGroupManager.createReaderGroup(Constants.READER_GROUP_NAME, readerGroupConfig);
+            System.out.println("Done creating a reader group with specified name  and config.");
 
             clientFactory = ClientFactory.withScope(Constants.SCOPE, clientConfig);
             System.out.println("Done creating a client factory with the specified scope and client config.");
 
-            writer = clientFactory.createEventWriter(
-                    Constants.STREAM_NAME, new JavaSerializer<String>(),
-                    EventWriterConfig.builder().build());
-            System.out.println("Done creating a writer.");
+            reader = clientFactory.createReader("readerId", Constants.READER_GROUP_NAME,
+                    new JavaSerializer<String>(), ReaderConfig.builder().build());
+            System.out.println("Done creating a reader.");
 
-            writer.writeEvent(Constants.MESSAGE);
-            System.out.println("Done writing an event: [" + Constants.MESSAGE + "].");
+            String readMessage = reader.readNextEvent(2000).getEvent();
+            System.out.println("Done reading an event: [" + readMessage + "].");
+
         } finally {
-            if (writer != null) writer.close();
+            if (reader != null) reader.close();
             if (clientFactory != null) clientFactory.close();
-            if (streamManager != null) streamManager.close();
+            if (readerGroupManager != null) readerGroupManager.close();
         }
-        System.err.println("All done with writing! Exiting...");
+        System.err.println("All done with reading! Exiting...");
     }
 }

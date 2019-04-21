@@ -1,69 +1,69 @@
-package org.example.pravega.client.examples.authenabled;
+package org.example.pravega.client.basicreadwrite.tlsenabled;
 
 import io.pravega.client.ClientConfig;
 import io.pravega.client.ClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.*;
-import io.pravega.client.stream.impl.DefaultCredentials;
 import io.pravega.client.stream.impl.JavaSerializer;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
+import org.example.pravega.client.driver.utilities.FileUtils;
 import org.example.pravega.client.driver.utilities.Utils;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.net.URI;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @Slf4j
-public class AuthReaderWriterExample {
+public class TlsReaderWriterExample {
 
-    @Test
-    public void testWriteAndReadEventWhenTlsIsDisabled() throws ReinitializationRequiredException {
-        String scope = "org.example.auth" + Utils.randomWithRange(1, 10);
-        String streamName = "stream1";
+    @Test(timeout = 50000)
+    public void testWriteAndReadEventWhenConfigurationIsProper() throws ExecutionException,
+            InterruptedException, ReinitializationRequiredException {
 
+        String scope = "TlsTestScope" + Utils.randomWithRange(1, 1000);
+        String streamName = "TlsTestStream";
         int numSegments = 10;
-        URI controllerURI = URI.create("tcp://localhost:9090");
+        String message = "Test event over TLS channel";
+        URI controllerURI = URI.create("tls://localhost:9090");
 
         ClientConfig clientConfig = ClientConfig.builder()
-                .credentials(new DefaultCredentials("1111_aaaa", "admin"))
                 .controllerURI(controllerURI)
+                .trustStore(FileUtils.absolutePathOfFileInClasspath("cert.pem"))
+                .validateHostName(false)
                 .build();
-        log.info("Done creating client config");
 
         @Cleanup
         StreamManager streamManager = StreamManager.create(clientConfig);
-        log.info("Created a stream manager");
+        assertNotNull(streamManager);
 
-        streamManager.createScope(scope);
-        log.info("Created a scope [{}]", scope);
+        boolean isScopeCreated = streamManager.createScope(scope);
+        //assertTrue("Failed to create scope", isScopeCreated);
 
-        streamManager.createStream(scope, streamName, StreamConfiguration.builder()
+        boolean isStreamCreated = streamManager.createStream(scope, streamName, StreamConfiguration.builder()
                 .scalingPolicy(ScalingPolicy.fixed(numSegments))
                 .build());
-        log.info("Created a stream with name [{}]", streamName);
+        Assert.assertTrue("Failed to create the stream ", isStreamCreated);
 
         @Cleanup
         ClientFactory clientFactory = ClientFactory.withScope(scope, clientConfig);
+
+        // Write an event to the stream.
 
         @Cleanup
         EventStreamWriter<String> writer = clientFactory.createEventWriter(streamName,
                 new JavaSerializer<String>(),
                 EventWriterConfig.builder().build());
-        log.info("Got a writer");
+        writer.writeEvent(message).get();
+        log.info("Done writing message '{}' to stream '{} / {}'", message, scope, streamName);
 
-        String writeEvent1 = "This is event 1";
-        writer.writeEvent(writeEvent1);
-        log.info("Done writing event [{}]", writeEvent1);
-
-        String writeEvent2 = "This is event 2";
-        writer.writeEvent(writeEvent2);
-        log.info("Done writing event [{}]", writeEvent2);
-
-        // Now, read the events from the stream.
+        // Now, read the event from the stream.
 
         String readerGroup = UUID.randomUUID().toString().replace("-", "");
         ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
@@ -82,13 +82,11 @@ public class AuthReaderWriterExample {
 
         // Keeping the read timeout large so that there is ample time for reading the event even in
         // case of abnormal delays in test environments.
-        String readEvent1 = reader.readNextEvent(2000).getEvent();
-        log.info("Done reading event [{}]", readEvent1);
+        String readMessage = reader.readNextEvent(10000).getEvent();
+        log.info("Done reading event [{}]", readMessage);
 
-        String readEvent2 = reader.readNextEvent(2000).getEvent();
-        log.info("Done reading event [{}]", readEvent2);
-
-        assertEquals(writeEvent1, readEvent1);
-        assertEquals(writeEvent2, readEvent2);
+        assertEquals(message, readMessage);
     }
+
+
 }

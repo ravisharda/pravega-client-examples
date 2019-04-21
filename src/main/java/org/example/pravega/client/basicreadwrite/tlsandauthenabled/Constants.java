@@ -1,4 +1,4 @@
-package org.example.pravega.client.examples.tlsandauthenabled;
+package org.example.pravega.client.basicreadwrite.tlsandauthenabled;
 
 import java.net.URI;
 import java.net.URISyntaxException;

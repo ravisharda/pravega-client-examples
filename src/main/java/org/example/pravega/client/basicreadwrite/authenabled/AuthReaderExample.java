@@ -1,4 +1,4 @@
-package org.example.pravega.client.examples.authenabled;
+package org.example.pravega.client.basicreadwrite.authenabled;
 
 import io.pravega.client.ClientConfig;
 import io.pravega.client.ClientFactory;

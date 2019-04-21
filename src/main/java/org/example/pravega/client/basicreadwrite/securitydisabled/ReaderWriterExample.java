@@ -1,4 +1,4 @@
-package org.example.pravega.client.examples.securitydisabled;
+package org.example.pravega.client.basicreadwrite.securitydisabled;
 
 import io.pravega.client.ClientConfig;
 import io.pravega.client.ClientFactory;
