@@ -117,7 +117,7 @@ public class BatchClient {
                 .controllerURI(controllerUri());
 
         if (isTlsEnabled) {
-            builder.trustStore(Utils.pathToFileInClasspath("cert.pem"))
+            builder.trustStore(absolutePathOfFileInClasspath("cert.pem"))
                     .validateHostName(false);
         }
         if (isAuthEnabled) {
