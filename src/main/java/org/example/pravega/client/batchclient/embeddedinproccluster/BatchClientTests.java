@@ -1,9 +1,12 @@
 package org.example.pravega.client.batchclient.embeddedinproccluster;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.pravega.client.BatchClientFactory;
 import io.pravega.client.ClientConfig;
 import io.pravega.client.ClientFactory;
+import io.pravega.client.admin.ReaderGroupManager;
+import io.pravega.client.admin.StreamInfo;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.batch.SegmentIterator;
 import io.pravega.client.batch.SegmentRange;
@@ -11,46 +14,47 @@ import io.pravega.client.batch.impl.SegmentRangeImpl;
 import io.pravega.client.netty.impl.ConnectionFactory;
 import io.pravega.client.netty.impl.ConnectionFactoryImpl;
 import io.pravega.client.segment.impl.Segment;
-import io.pravega.client.stream.*;
+import io.pravega.client.stream.Checkpoint;
+import io.pravega.client.stream.EventStreamWriter;
+import io.pravega.client.stream.EventWriterConfig;
+import io.pravega.client.stream.ReaderGroup;
+import io.pravega.client.stream.ReaderGroupConfig;
+import io.pravega.client.stream.ScalingPolicy;
+import io.pravega.client.stream.Serializer;
+import io.pravega.client.stream.Stream;
+import io.pravega.client.stream.StreamConfiguration;
+import io.pravega.client.stream.StreamCut;
+import io.pravega.client.stream.impl.ClientFactoryImpl;
 import io.pravega.client.stream.impl.ControllerImpl;
 import io.pravega.client.stream.impl.ControllerImplConfig;
 import io.pravega.client.stream.impl.DefaultCredentials;
 import io.pravega.client.stream.impl.JavaSerializer;
+import io.pravega.client.stream.impl.StreamCutImpl;
 import io.pravega.common.concurrent.ExecutorServiceHelpers;
-import io.pravega.common.hash.RandomFactory;
+import io.pravega.common.concurrent.Futures;
 import io.pravega.local.InProcPravegaCluster;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
+import org.junit.*;
 import java.net.URI;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.Supplier;
-import java.util.stream.IntStream;
-
-import static io.pravega.shared.segment.StreamSegmentNameUtils.computeSegmentId;
-import static junit.framework.TestCase.assertTrue;
 import static org.example.pravega.common.FileUtils.absolutePathOfFileInClasspath;
 import static org.junit.Assert.assertEquals;
+import static org.example.pravega.client.batchclient.embeddedinproccluster.BatchClientTestHelper.*;
 
 @Slf4j
 public class BatchClientTests {
-
-    //private static final int READ_TIMEOUT = 1000;
 
     boolean isAuthEnabled = false;
     boolean isTlsEnabled = false;
 
     InProcPravegaCluster inProcCluster = null;
 
-    private final ScheduledExecutorService executor = ExecutorServiceHelpers.newScheduledThreadPool(4, "executor");
-    private final Random random = RandomFactory.create();
-    private static final String DATA_OF_SIZE_30 = "data of size 30"; // data length = 22 bytes , header = 8 bytes
-
+    private final ScheduledExecutorService executor = ExecutorServiceHelpers.newScheduledThreadPool(4,
+            "executor");
 
     @Before
     public void setup() throws Exception {
@@ -77,7 +81,7 @@ public class BatchClientTests {
         }
 
         if (isAuthEnabled) {
-            builder.enableAuth(false)
+            builder.enableAuth(true)
                     .userName("admin")
                     .passwd("1111_aaaa")
                     .passwdFile(absolutePathOfFileInClasspath("pravega/standalone/passwd"));
@@ -137,7 +141,7 @@ public class BatchClientTests {
     }
 
     @Test
-    public void batchClientReadSegments() throws ExecutionException, InterruptedException {
+    public void batchClientReadSegments() throws Exception {
         String scopeName = "basicTestScope";
         String streamName = "basicTestStream";
 
@@ -162,11 +166,7 @@ public class BatchClientTests {
         EventStreamWriter<String> writer = clientFactory.createEventWriter(streamName, new JavaSerializer<String>(),
                 EventWriterConfig.builder().build());
 
-        // write 3 30 byte events to the test stream with 1 segment.
-        write30ByteEvents(3, writer);
-        log.info("Wrote 3 events, while the stream had 1 segment.");
-
-        // Create the gRPC client proxy, that we'll use for scaling up the streams
+        // Create the gRPC client proxy, that we'll use for scaling the streams
         @Cleanup
         ConnectionFactory connectionFactory = new ConnectionFactoryImpl(clientConfig);
         ControllerImpl controller = new ControllerImpl(
@@ -174,35 +174,7 @@ public class BatchClientTests {
                 connectionFactory.getInternalExecutor());
         Stream stream = Stream.of(scopeName, streamName);
 
-        /* scale the stream up to 3 segments and then write events. */
-
-        Map<Double, Double> map = new HashMap<>();
-        map.put(0.0, 0.33);
-        map.put(0.33, 0.66);
-        map.put(0.66, 1.0);
-        boolean scaleResult = controller.scaleStream(stream, Collections.singletonList(0L), map, executor)
-                .getFuture()
-                .get();
-        assertTrue("Scale up operation result", scaleResult);
-        log.info("Done scaling up the stream to 3 segments. Scale result was {}", scaleResult);
-
-        write30ByteEvents(3, writer);
-        log.info("Wrote 3 more events.");
-
-        /* Scale the stream down to 2 segments, and then write some more events */
-
-        map = new HashMap<>();
-        map.put(0.0, 0.5);
-        map.put(0.5, 1.0);
-
-        scaleResult = controller.scaleStream(stream,
-                Arrays.asList(computeSegmentId(1, 1),
-                        computeSegmentId(2, 1),
-                        computeSegmentId(3, 1)), map, executor).getFuture().get();
-        log.info("Done scaling down the stream to 2 segments. Scale result was {}", scaleResult);
-        assertTrue("Scale down operation result", scaleResult);
-        write30ByteEvents(3, writer);
-        log.info("Wrote 3 more events.");
+        addEventsToStream(writer, scopeName, streamName, controller, executor);
 
         /* Now, using a batch client to read back the events */
 
@@ -234,9 +206,220 @@ public class BatchClientTests {
         assertEquals(DATA_OF_SIZE_30, dataAtOffset.get(0));
     }
 
-    private void write30ByteEvents(int numberOfEvents, EventStreamWriter<String> writer) {
-        Supplier<String> routingKeyGenerator = () -> String.valueOf(random.nextInt());
-        IntStream.range(0, numberOfEvents).forEach(v -> writer.writeEvent(routingKeyGenerator.get(),
-                DATA_OF_SIZE_30).join());
+    // Not working yet, so ignored for now.
+    @Ignore
+    @Test
+    public void batchClientStreamCuts() {
+        String scopeName = "testscope";
+        String streamName = "teststream";
+        String readerGroupName = "rg";
+        int readerGroupParallelism = 4;
+        int totalEvents = readerGroupParallelism * 10;
+        int offsetEvents = readerGroupParallelism * 20;
+        int numSegments = 1;
+        int batchIterations = 4;
+
+        final Stream stream = Stream.of(scopeName, streamName);
+        final ClientConfig clientConfig = prepareClientConfig();
+        log.info("Done creating client config");
+
+        @Cleanup
+        StreamManager streamManager = StreamManager.create(clientConfig);
+        log.info("Done creating a stream manager.");
+
+        streamManager.createScope(scopeName);
+        log.info("Done creating a scope with the specified name: [" + scopeName + "].");
+
+        StreamConfiguration streamConfig = StreamConfiguration.builder()
+                .scalingPolicy(ScalingPolicy.fixed(numSegments))
+                .build();
+        log.info("Done creating a stream configuration.");
+
+        streamManager.createStream(scopeName, streamName, streamConfig);
+        log.info("Done creating a stream with the specified name: [{}] and stream configuration [{}]"
+                , streamName, streamConfig);
+
+        @Cleanup
+        ConnectionFactory connectionFactory = new ConnectionFactoryImpl(clientConfig);
+        log.info("Done creating connectionFactory");
+
+        // Create the gRPC client proxy
+        ControllerImpl controller = new ControllerImpl(
+                ControllerImplConfig.builder().clientConfig(clientConfig).build(),
+                connectionFactory.getInternalExecutor());
+        log.info("Done creating controller proxy ControllerImpl");
+
+        @Cleanup
+        ClientFactoryImpl clientFactory = new ClientFactoryImpl(scopeName, controller);
+        log.info("Done creating ClientFactoryImpl");
+
+        @Cleanup
+        BatchClientFactory batchClientFactory = BatchClientFactory.withScope(scopeName, clientConfig);
+        log.info("Done creating batchClientFactory");
+
+        @Cleanup
+        ReaderGroupManager groupManager = ReaderGroupManager.withScope(scopeName, controllerUri());
+
+        String streamFQN = scopeName + "/" + streamName;
+
+        groupManager.createReaderGroup(readerGroupName,
+                ReaderGroupConfig.builder().disableAutomaticCheckpoints()
+                        .stream(streamFQN)
+                        .build());
+        log.info("Done creating a ReaderGroup with name {} and for stream {}", readerGroupName, streamFQN);
+
+        ReaderGroup readerGroup = groupManager.getReaderGroup(readerGroupName);
+        log.info("Done creating batchClientFactory");
+
+        // Write events to the Stream.
+        writeEvents(clientFactory, streamName, totalEvents);
+        log.info("Done writing events");
+
+        // Instantiate readers to consume from Stream up to truncatedEvents.
+        List<CompletableFuture<Integer>> futures =
+                readEventFutures(clientFactory, readerGroupName, readerGroupParallelism, offsetEvents);
+        Futures.allOf(futures).join();
+
+        // Create a stream cut on the specified offset position.
+        Checkpoint cp = readerGroup.initiateCheckpoint("batchClientCheckpoint", executor).join();
+        StreamCut streamCut = cp.asImpl().getPositions().values().iterator().next();
+
+        // Instantiate the batch client and assert it provides correct stream info.
+        log.debug("Creating batch client.");
+        StreamInfo streamInfo = streamManager.getStreamInfo(scopeName, stream.getStreamName());
+        log.debug("Validating stream metadata fields.");
+        assertEquals("Expected Stream name: ", streamName, streamInfo.getStreamName());
+        assertEquals("Expected Scope name: ", scopeName, streamInfo.getScope());
+
+        // Test that we can read events from parallel segments from an offset onwards.
+        log.debug("Reading events from stream cut onwards in parallel.");
+        List<SegmentRange> ranges = Lists.newArrayList(
+                batchClientFactory.getSegments(stream, streamCut, StreamCut.UNBOUNDED).getIterator());
+        assertEquals("Expected events read: ", totalEvents - offsetEvents, readFromRanges(ranges, batchClientFactory));
+
+        // Emulate the behavior of Hadoop client: i) Get tail of Stream, ii) Read from current point until tail, iii) repeat.
+        log.debug("Reading in batch iterations.");
+        StreamCut currentTailStreamCut = streamManager.getStreamInfo(scopeName, stream.getStreamName()).getTailStreamCut();
+        int readEvents = 0;
+        for (int i = 0; i < batchIterations; i++) {
+            writeEvents(clientFactory, streamName, totalEvents);
+
+            // Read all the existing events in parallel segments from the previous tail to the current one.
+            ranges = Lists.newArrayList(batchClientFactory.getSegments(stream, currentTailStreamCut, StreamCut.UNBOUNDED).getIterator());
+            assertEquals("Expected number of segments: ", readerGroupParallelism, ranges.size());
+            readEvents += readFromRanges(ranges, batchClientFactory);
+            log.debug("Events read in parallel so far: {}.", readEvents);
+            currentTailStreamCut = streamManager.getStreamInfo(scopeName, stream.getStreamName()).getTailStreamCut();
+        }
+
+        assertEquals("Expected events read: .", totalEvents * batchIterations, readEvents);
+
+        // Truncate the stream in first place.
+        log.debug("Truncating stream at event {}.", offsetEvents);
+        Assert.assertTrue(controller.truncateStream(scopeName, streamName, streamCut).join());
+
+        // Test the batch client when we select to start reading a Stream from a truncation point.
+        StreamCut initialPosition = streamManager.getStreamInfo(scopeName, stream.getStreamName()).getHeadStreamCut();
+        List<SegmentRange> newRanges = Lists.newArrayList(batchClientFactory.getSegments(stream, initialPosition, StreamCut.UNBOUNDED).getIterator());
+        assertEquals("Expected events read: ", (totalEvents - offsetEvents) + totalEvents * batchIterations,
+                readFromRanges(newRanges, batchClientFactory));
+        log.debug("Events correctly read from Stream: simple batch client test passed.");
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testBatchClientWithStreamTruncation() throws Exception {
+        String scopeName = "testScope";
+        String streamName = "testStream";
+        Stream stream = Stream.of(scopeName, streamName);
+
+        ClientConfig clientConfig = prepareClientConfig();
+        StreamManager streamManager = StreamManager.create(clientConfig);
+
+        // Create the gRPC client proxy, that we'll use for scaling the streams
+        @Cleanup
+        ConnectionFactory connectionFactory = new ConnectionFactoryImpl(clientConfig);
+        ControllerImpl controller = new ControllerImpl(
+                ControllerImplConfig.builder().clientConfig(clientConfig).build(),
+                connectionFactory.getInternalExecutor());
+
+        createTestStreamWithEvents(clientConfig, scopeName, streamName, controller, executor);
+
+        @Cleanup
+        BatchClientFactory batchClient = BatchClientFactory.withScope(scopeName, clientConfig);
+
+        // 1. Create a StreamCut after 2 events(offset = 2 * 30 = 60).
+        StreamCut streamCut60L = new StreamCutImpl(stream,
+                ImmutableMap.of(new Segment(scopeName, streamName, 0), 60L));
+
+        // 2. Truncate stream.
+        Assert.assertTrue("truncate stream",
+                controller.truncateStream(scopeName, streamName, streamCut60L).get());
+
+        // 3a. Fetch Segments using StreamCut.UNBOUNDED>
+        ArrayList<SegmentRange> segmentsPostTruncation1 = Lists.newArrayList(
+                batchClient.getSegments(stream, StreamCut.UNBOUNDED, StreamCut.UNBOUNDED).getIterator());
+
+        // 3b. Fetch Segments using getStreamInfo() api.
+        StreamInfo streamInfo = streamManager.getStreamInfo(scopeName, streamName);
+        ArrayList<SegmentRange> segmentsPostTruncation2 =
+                Lists.newArrayList(batchClient.getSegments(stream, streamInfo.getHeadStreamCut(),
+                        streamInfo.getTailStreamCut()).getIterator());
+
+        // Validate results.
+        validateSegmentCountAndEventCount(batchClient, segmentsPostTruncation1);
+        validateSegmentCountAndEventCount(batchClient, segmentsPostTruncation2);
+    }
+
+
+    // Simplified version of batchClientReadSegments() test. TODO: keep one of them.
+    @Ignore
+    @Test
+    public void test() throws ExecutionException, InterruptedException {
+        String scopeName = "tscopeName";
+        String streamName = "tscopeName";
+        Stream stream = Stream.of(scopeName, streamName);
+        Serializer<String> serializer = new JavaSerializer<String>();
+
+        ClientConfig clientConfig = prepareClientConfig();
+
+
+        // Create the gRPC client proxy, that we'll use for scaling the streams
+        @Cleanup
+        ConnectionFactory connectionFactory = new ConnectionFactoryImpl(clientConfig);
+        ControllerImpl controller = new ControllerImpl(
+                ControllerImplConfig.builder().clientConfig(clientConfig).build(),
+                connectionFactory.getInternalExecutor());
+
+        createTestStreamWithEvents(clientConfig, scopeName, streamName, controller, executor);
+
+        @Cleanup
+        BatchClientFactory batchClient = BatchClientFactory.withScope(scopeName,
+               clientConfig);
+
+        // List out all the segments in the stream.
+        ArrayList<SegmentRange> segments = Lists.newArrayList(batchClient.getSegments(
+                stream, null, null).getIterator());
+
+        assertEquals("Expected number of segments", 6, segments.size());
+
+        // Batch read all events from stream.
+        List<String> batchEventList = new ArrayList<>();
+        segments.forEach(segInfo -> {
+            @Cleanup
+            SegmentIterator<String> segmentIterator = batchClient.readSegment(segInfo, serializer);
+            batchEventList.addAll(Lists.newArrayList(segmentIterator));
+        });
+        assertEquals("Event count", 9, batchEventList.size());
+
+        // Read from a given offset.
+        Segment seg0 = new Segment(scopeName, streamName, 0);
+        SegmentRange seg0Info = SegmentRangeImpl.builder().segment(seg0).startOffset(60).endOffset(90).build();
+
+        @Cleanup
+        SegmentIterator<String> seg0Iterator = batchClient.readSegment(seg0Info, serializer);
+        ArrayList<String> dataAtOffset = Lists.newArrayList(seg0Iterator);
+        assertEquals(1, dataAtOffset.size());
+        assertEquals(DATA_OF_SIZE_30, dataAtOffset.get(0));
     }
 }
