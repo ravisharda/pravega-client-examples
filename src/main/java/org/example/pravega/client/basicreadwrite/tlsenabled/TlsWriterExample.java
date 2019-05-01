@@ -9,7 +9,7 @@ import io.pravega.client.stream.ScalingPolicy;
 import io.pravega.client.stream.StreamConfiguration;
 import io.pravega.client.stream.impl.JavaSerializer;
 import lombok.Cleanup;
-import org.example.pravega.client.driver.utilities.FileUtils;
+import org.example.pravega.common.FileUtils;
 
 import java.net.URI;
 

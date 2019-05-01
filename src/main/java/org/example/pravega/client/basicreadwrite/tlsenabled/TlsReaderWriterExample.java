@@ -8,7 +8,7 @@ import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.JavaSerializer;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
-import org.example.pravega.client.driver.utilities.FileUtils;
+import org.example.pravega.common.FileUtils;
 import org.example.pravega.client.driver.utilities.Utils;
 import org.junit.Assert;
 import org.junit.Test;
