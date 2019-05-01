@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 @Slf4j
 public class ReaderWriterExample {
     private static final String CONTROLLER_HOST = "localhost";
+    private static final String TRUSTSTORE_PATH = "/path/to/ca-or-server-certificate";
 
     @Test
     public void writeAndReadEventWithTlsAndAuthEnabled() {
@@ -30,20 +31,12 @@ public class ReaderWriterExample {
 
         ClientConfig clientConfig = ClientConfig.builder()
                 .controllerURI(controllerURI)
+                .trustStore(TRUSTSTORE_PATH)
+                .validateHostName(false)
                 .build();
         log.info("Done creating client config");
 
         writeThenread(scope, streamName, numSegments, clientConfig);
-    }
-
-    private URI controlerUri(boolean isTlsEnabled) {
-        String uri = null;
-        if (isTlsEnabled) {
-            uri = String.format("tls://%s:9090", CONTROLLER_HOST);
-        } else {
-            uri = String.format("tcp://%s:9090", CONTROLLER_HOST);
-        }
-        return URI.create(uri);
     }
 
     @Test
@@ -124,5 +117,15 @@ public class ReaderWriterExample {
         }
         assertEquals(writeEvent1, readEvent1);
         assertEquals(writeEvent2, readEvent2);
+    }
+
+    private URI controlerUri(boolean isTlsEnabled) {
+        String uri = null;
+        if (isTlsEnabled) {
+            uri = String.format("tls://%s:9090", CONTROLLER_HOST);
+        } else {
+            uri = String.format("tcp://%s:9090", CONTROLLER_HOST);
+        }
+        return URI.create(uri);
     }
 }
