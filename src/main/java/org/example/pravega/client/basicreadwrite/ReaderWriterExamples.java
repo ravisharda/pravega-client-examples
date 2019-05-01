@@ -35,7 +35,7 @@ public class ReaderWriterExamples {
         ClientConfig clientConfig = ClientConfig.builder()
                 .controllerURI(controllerURI)
                 .trustStore(TRUSTSTORE_PATH)
-                .validateHostName(false)
+                .validateHostName(false) // Turn off hostname verification for client-to-segment store calls.
                 .credentials(new DefaultCredentials("1111_aaaa", "admin"))
                 .build();
         log.info("Done creating client config");
