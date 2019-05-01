@@ -17,7 +17,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 
 @Slf4j
-public class ReaderWriterExample {
+public class ReaderWriterExamples {
     private static final String CONTROLLER_HOST = "localhost";
     private static final String TRUSTSTORE_PATH = "/path/to/ca-or-server-certificate";
 
