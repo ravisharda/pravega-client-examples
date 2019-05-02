@@ -10,7 +10,6 @@ import io.pravega.client.stream.impl.DefaultCredentials;
 import io.pravega.client.stream.impl.JavaSerializer;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
-import org.example.pravega.client.basicreadwrite.tlsandauthenabled.Constants;
 import org.example.pravega.client.driver.utilities.Utils;
 import org.junit.Test;
 
@@ -82,10 +81,12 @@ public class ReaderWriterExamples {
 
         String writeEvent1 = "This is event 1";
         writer.writeEvent(writeEvent1);
+        writer.flush();
         log.info("Done writing event [{}]", writeEvent1);
 
         String writeEvent2 = "This is event 2";
         writer.writeEvent(writeEvent2);
+        writer.flush();
         log.info("Done writing event [{}]", writeEvent2);
 
         // Now, read back the events from the stream.
