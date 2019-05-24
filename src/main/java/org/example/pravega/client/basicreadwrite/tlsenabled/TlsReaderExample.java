@@ -7,7 +7,7 @@ import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.JavaSerializer;
 import lombok.Cleanup;
-import org.example.pravega.client.driver.utilities.FileUtils;
+import org.example.pravega.common.FileUtils;
 
 import java.net.URI;
 import java.util.UUID;

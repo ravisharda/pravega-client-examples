@@ -1,20 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-Copyright (c) 2017 Dell Inc., or its subsidiaries. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
--->
 <configuration scan="true">
     <!-- Insert the current time formatted as "yyyyMMdd'T'HHmmss" under
     the key "bySecond" into the logger context. This value will be
     available to all subsequent configuration elements. -->
     <timestamp key="bySecond" datePattern="HHmmss-yyyyMMdd"/>
-
-    <logger name="org.example.pravegaclientsamples" level="INFO"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -23,31 +12,27 @@ You may obtain a copy of the License at
         </encoder>
     </appender>
 
-    <!--
-    <appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>/home/rsharda/logs/client/pravega.%d{yyyy-MM-dd}.log</fileNamePattern>
-        </rollingPolicy>
-
-        <encoder>
-            <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n</pattern>
-        </encoder>
-    </appender>
-    -->
-
+    <!-- Creates a new file for each run. -->
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>~/logs/client/${bySecond}.log</file>
+        <file>logs/${bySecond}.log</file>
         <append>true</append>
         <encoder>
             <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36}.%M\(%line\) - %msg%n</Pattern>
         </encoder>
     </appender>
 
-    <root level="ERROR">
-        <appender-ref ref="STDOUT"/>
-        <!--<appender-ref ref="FILE"/>-->
+    <root level="TRACE">
+        <appender-ref ref="FILE"/>
     </root>
 
+    <logger name="org.example.pravega" level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="io.netty" level="TRACE"/>
+    <logger name="io.grpc" level="TRACE"/>
+    <logger name="org.apache.zookeeper" level="TRACE"/>
+    <logger name="org.apache.curator" level="TRACE"/>
+    <logger name="io.pravega" level="TRACE"/>
 
 </configuration>
