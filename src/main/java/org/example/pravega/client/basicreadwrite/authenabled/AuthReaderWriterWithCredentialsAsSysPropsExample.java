@@ -26,7 +26,11 @@ public class AuthReaderWriterWithCredentialsAsSysPropsExample extends AuthReader
     public void testWriteAndReadEvent() {
         // Using a lock to prevent concurrent execution of tests that set system properties.
         sequential.lock();
+
+        // Set auth params via Java system properties
         setClientAuthParams("admin", "1111_aaaa");
+        //setClientAuthSystemProperties("StaticTokenAuthHandler", "static-token"); // a custom AuthHandler implementation
+
         try {
             super.testWriteAndReadEvent();
             unsetClientAuthProperties();
