@@ -17,23 +17,30 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * This example can be executed against a separately running Pravega server.
+ */
 @Slf4j
 public class AuthReaderWriterExample {
 
-    @Test
-    public void testWriteAndReadEventWhenTlsIsDisabled() throws ReinitializationRequiredException {
-        String scope = "org.example.auth" + Utils.randomWithRange(1, 10);
-        String streamName = "stream1";
+    protected URI prepareControllerUri() {
+        return URI.create("tcp://localhost:9090");
+    }
 
-        int numSegments = 10;
-        URI controllerURI = URI.create("tcp://localhost:9090");
-
-        ClientConfig clientConfig = ClientConfig.builder()
+    protected ClientConfig prepareValidClientConfig() {
+        return ClientConfig.builder()
                 .credentials(new DefaultCredentials("1111_aaaa", "admin"))
-                .controllerURI(controllerURI)
+                .controllerURI(prepareControllerUri())
                 .build();
-        log.info("Done creating client config");
+    }
 
+    @Test
+    public void testWriteAndReadEvent() throws ReinitializationRequiredException {
+        String scope = "org.example.auth" + Utils.randomWithRange(1, 1000);
+        String streamName = "stream1";
+        int numSegments = 1;
+
+        ClientConfig clientConfig = prepareValidClientConfig();
         @Cleanup
         StreamManager streamManager = StreamManager.create(clientConfig);
         log.info("Created a stream manager");
