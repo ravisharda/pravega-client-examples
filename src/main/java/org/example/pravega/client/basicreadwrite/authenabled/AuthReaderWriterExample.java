@@ -35,7 +35,7 @@ public class AuthReaderWriterExample {
     }
 
     @Test
-    public void testWriteAndReadEvent() throws ReinitializationRequiredException {
+    public void writeThenReadEvent() throws ReinitializationRequiredException {
         String scope = "org.example.auth" + Utils.randomWithRange(1, 1000);
         String streamName = "stream1";
         int numSegments = 1;
