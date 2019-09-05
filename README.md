@@ -6,7 +6,7 @@ Examples demonstrating Pravega features and configurations
 ```
 $ git clone https://github.com/ravisharda/pravega-examples.git
 $ cd pravega-examples
-$ ./gradle wrapper
+$ gradle wrapper
 ```
 
 ## How to build
