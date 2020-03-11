@@ -187,6 +187,176 @@ public class ReaderWriterExamples {
         assertEquals(writeEvent2, readEvent2);
     }
 
+    @Test
+    public void writeThenReadToMultipleStreamsUsingMultipleGroups() {
+        final String scope = "rwna-" + Math.random();
+        final String stream1 = "test-stream-1";
+        final String stream2 = "test-stream-2";
+        final String controllerUri = "tcp://localhost:9090";
+        final int numSegments = 1;
+        final String writeEvent1 = "This is event 1 in stream 1";
+        final String writeEvent2 = "This is event 2 in stream 2";
+        final String readerGroup1 = "RG-1";
+        final String readerGroup2 = "RG-2";
+
+        ClientConfig clientConfig = ClientConfig.builder()
+                .controllerURI(URI.create(controllerUri))
+                .build();
+
+        @Cleanup
+        StreamManager streamManager = StreamManager.create(clientConfig);
+        System.out.println("Created a stream manager");
+
+        // Create scope
+        streamManager.createScope(scope);
+        System.out.format("Created a scope [%s]%n", scope);
+
+        // Create stream 1
+        streamManager.createStream(scope, stream1, StreamConfiguration.builder()
+                .scalingPolicy(ScalingPolicy.fixed(numSegments))
+                .build());
+        System.out.format("Created stream1 with name [%s]%n", stream1);
+
+        // Create stream 2
+        streamManager.createStream(scope, stream2, StreamConfiguration.builder()
+                .scalingPolicy(ScalingPolicy.fixed(numSegments))
+                .build());
+        System.out.format("Created stream2 with name [%s]%n", stream2);
+
+        EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(scope, clientConfig);
+
+        @Cleanup
+        EventStreamWriter<String> writer1 = clientFactory.createEventWriter(stream1,
+                new JavaSerializer<String>(), EventWriterConfig.builder().build());
+        writer1.writeEvent(writeEvent1).join();
+        System.out.format("Done writing event 1 = [%s] to stream 1 = [%s]%n", writeEvent1, stream1);
+
+
+        @Cleanup
+        EventStreamWriter<String> writer2 = clientFactory.createEventWriter(stream2,
+                new JavaSerializer<String>(), EventWriterConfig.builder().build());
+        writer2.writeEvent(writeEvent2).join();
+        System.out.format("Done writing event 2 = [%s] to stream 2 = [%s]%n", writeEvent2, stream2);
+
+        // Now, read back the events from the stream.
+
+        @Cleanup
+        ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(scope, clientConfig);
+
+        readerGroupManager.createReaderGroup(readerGroup1, ReaderGroupConfig.builder()
+                .stream(Stream.of(scope, stream1))
+                .disableAutomaticCheckpoints()
+                .build());
+
+        readerGroupManager.createReaderGroup(readerGroup2, ReaderGroupConfig.builder()
+                .stream(Stream.of(scope, stream2))
+                .disableAutomaticCheckpoints()
+                .build());
+
+
+
+        @Cleanup
+        EventStreamReader<String> reader1 = clientFactory.createReader("readerId", readerGroup1,
+                new JavaSerializer<String>(), ReaderConfig.builder().build());
+
+        @Cleanup
+        EventStreamReader<String> reader2 = clientFactory.createReader("readerId", readerGroup2,
+                new JavaSerializer<String>(), ReaderConfig.builder().build());
+
+        String readEvent1 = reader1.readNextEvent(2000).getEvent();
+        String readEvent2 = reader2.readNextEvent(2000).getEvent();
+
+        System.out.format("Read event [%s] from reader1%n", readEvent1);
+        System.out.format("Read event [%s] from reader2%n", readEvent2);
+
+        assertEquals(writeEvent1, readEvent1);
+        assertEquals(writeEvent2, readEvent2);
+    }
+
+    @Test
+    public void writeThenReadToMultipleStreamsUsingSingleGroup() {
+        final String scope = "rwna-" + Math.random();
+        final String stream1 = "test-stream-1";
+        final String stream2 = "test-stream-2";
+        final String controllerUri = "tcp://localhost:9090";
+        final int numSegments = 1;
+        final String writeEvent1 = "This is event 1 in stream 1";
+        final String writeEvent2 = "This is event 2 in stream 1";
+        final String readerGroup = "RG-1";
+
+        ClientConfig clientConfig = ClientConfig.builder()
+                .controllerURI(URI.create(controllerUri))
+                .build();
+
+        @Cleanup
+        StreamManager streamManager = StreamManager.create(clientConfig);
+        System.out.println("Created a stream manager");
+
+        // Create scope
+        streamManager.createScope(scope);
+        System.out.format("Created a scope [%s]%n", scope);
+
+        // Create stream 1
+        streamManager.createStream(scope, stream1, StreamConfiguration.builder()
+                .scalingPolicy(ScalingPolicy.fixed(numSegments))
+                .build());
+        System.out.format("Created stream1 with name [%s]%n", stream1);
+
+        // Create stream 2
+        streamManager.createStream(scope, stream2, StreamConfiguration.builder()
+                .scalingPolicy(ScalingPolicy.fixed(numSegments))
+                .build());
+        System.out.format("Created stream2 with name [%s]%n", stream2);
+
+        EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(scope, clientConfig);
+
+        @Cleanup
+        EventStreamWriter<String> writer1 = clientFactory.createEventWriter(stream1,
+                new JavaSerializer<String>(), EventWriterConfig.builder().build());
+        writer1.writeEvent(writeEvent1).join();
+        System.out.format("Done writing event 1 = [%s] to stream 1 = [%s]%n", writeEvent1, stream1);
+
+
+        @Cleanup
+        EventStreamWriter<String> writer2 = clientFactory.createEventWriter(stream2,
+                new JavaSerializer<String>(), EventWriterConfig.builder().build());
+        writer2.writeEvent(writeEvent2).join();
+        System.out.format("Done writing event 2 = [%s] to stream 2 = [%s]%n", writeEvent2, stream2);
+
+        // Now, read back the events from the stream.
+
+        @Cleanup
+        ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(scope, clientConfig);
+
+        readerGroupManager.createReaderGroup(readerGroup, ReaderGroupConfig.builder()
+                .stream(Stream.of(scope, stream1))
+                .stream(Stream.of(scope, stream2))
+                .disableAutomaticCheckpoints()
+                .build());
+
+
+        @Cleanup
+        EventStreamReader<String> reader = clientFactory.createReader("readerId", readerGroup,
+                new JavaSerializer<String>(), ReaderConfig.builder().build());
+
+
+        EventRead<String> event = null;
+        int count = 0;
+        do {
+            try {
+                event = reader.readNextEvent(1000);
+                if (event.getEvent() != null) {
+                    count++;
+                    System.out.format("Read event '%s'%n", event.getEvent());
+                }
+            } catch (ReinitializationRequiredException e) {
+                e.printStackTrace();
+            }
+        } while (event.getEvent() != null);
+
+        assertEquals(2, count);
+    }
+
     private URI controlerUri(boolean isTlsEnabled) {
         String uri = null;
         if (isTlsEnabled) {
