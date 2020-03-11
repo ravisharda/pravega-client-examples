@@ -63,7 +63,7 @@ public class JSONWriter {
     public static ObjectNode createJSONData() {
         ObjectNode message = null;
         try {
-            String data = "{\"id\":" + Math.random() + ",\"name\":\"DELL EMC\",\"building\":3,\"location\":\"India\"}";
+            String data = "{\"id\":" + Math.random() + ",\"name\":\"My Corp\",\"building\":3,\"location\":\"India\"}";
             // Deserialize the JSON message.
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(data);
