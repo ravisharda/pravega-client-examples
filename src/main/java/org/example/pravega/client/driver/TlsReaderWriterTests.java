@@ -3,9 +3,10 @@ package org.example.pravega.client.driver;
 import lombok.extern.slf4j.Slf4j;
 import org.example.pravega.client.driver.common.Reader;
 import org.example.pravega.client.driver.common.Writer;
-import org.example.pravega.client.driver.utilities.EnvironmentProperties;
-import org.example.pravega.common.FileUtils;
+import org.example.pravega.shared.PathUtils;
+import org.example.pravega.shared.StandaloneServerTlsConstants;
 import org.junit.Test;
+import org.example.pravega.shared.EnvironmentProperties;
 
 import java.net.URI;
 
@@ -21,7 +22,7 @@ public class TlsReaderWriterTests {
         String controllerUri = EnvironmentProperties.defaultControllerUri(true);
         log.info("Controller Uri: {}", controllerUri);
 
-        String trustStoreFilePath = FileUtils.absolutePathOfFileInClasspath("cert.pem");
+        String trustStoreFilePath = StandaloneServerTlsConstants.CA_CERT_LOCATION;
 
         // Write events to stream
         Writer writer = new Writer(scope, streamName, URI.create(controllerUri), trustStoreFilePath);

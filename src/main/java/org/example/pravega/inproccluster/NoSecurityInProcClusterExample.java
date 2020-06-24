@@ -2,8 +2,7 @@ package org.example.pravega.inproccluster;
 
 import io.pravega.local.InProcPravegaCluster;
 import lombok.extern.slf4j.Slf4j;
-
-import static org.example.pravega.common.FileUtils.absolutePathOfFileInClasspath;
+import org.example.pravega.shared.StandaloneServerTlsConstants;
 
 @Slf4j
 public class NoSecurityInProcClusterExample {
@@ -23,14 +22,14 @@ public class NoSecurityInProcClusterExample {
                 .containerCount(4)
                 .enableTls(false)
                 .enableAuth(false)
-                .keyFile(absolutePathOfFileInClasspath("pravega/standalone/key.pem"))
-                .certFile(absolutePathOfFileInClasspath("pravega/standalone/cert.pem"))
+                .keyFile(StandaloneServerTlsConstants.SERVER_KEY_LOCATION)
+                .certFile(StandaloneServerTlsConstants.SERVER_CERT_LOCATION)
                 .userName("")
                 .passwd("1111_aaaa")
-                .passwdFile(absolutePathOfFileInClasspath("pravega/standalone/passwd"))
-                .jksKeyFile(absolutePathOfFileInClasspath("pravega/standalone/standalone.keystore.jks"))
-                .jksTrustFile(absolutePathOfFileInClasspath("pravega/standalone/standalone.truststore.jks"))
-                .keyPasswordFile(absolutePathOfFileInClasspath("pravega/standalone/standalone.keystore.jks.passwd"))
+                .passwdFile(StandaloneServerTlsConstants.SERVER_PASSWD_LOCATION)
+                .jksKeyFile(StandaloneServerTlsConstants.SERVER_CERT_LOCATION)
+                .jksTrustFile(StandaloneServerTlsConstants.TRUSTSTORE_LOCATION)
+                .keyPasswordFile(StandaloneServerTlsConstants.SERVER_KEYSTORE_PWD_LOCATION)
                 .build();
 
        inProcCluster.setControllerPorts(new int[]{9090});

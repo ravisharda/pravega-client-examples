@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.pravega.client.BatchClientFactory;
 import io.pravega.client.ClientConfig;
-import io.pravega.client.ClientFactory;
+import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
 import io.pravega.client.admin.StreamInfo;
 import io.pravega.client.admin.StreamManager;
@@ -35,15 +35,22 @@ import io.pravega.common.concurrent.Futures;
 import io.pravega.local.InProcPravegaCluster;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
+import org.example.pravega.shared.StandaloneServerTlsConstants;
 import org.junit.*;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
-import static org.example.pravega.common.FileUtils.absolutePathOfFileInClasspath;
+
+import static org.example.pravega.client.batchclient.embeddedinproccluster.BatchClientTestHelper.DATA_OF_SIZE_30;
+import static org.example.pravega.client.batchclient.embeddedinproccluster.BatchClientTestHelper.addEventsToStream;
+import static org.example.pravega.client.batchclient.embeddedinproccluster.BatchClientTestHelper.createTestStreamWithEvents;
+import static org.example.pravega.client.batchclient.embeddedinproccluster.BatchClientTestHelper.readEventFutures;
+import static org.example.pravega.client.batchclient.embeddedinproccluster.BatchClientTestHelper.readFromRanges;
+import static org.example.pravega.client.batchclient.embeddedinproccluster.BatchClientTestHelper.validateSegmentCountAndEventCount;
+import static org.example.pravega.client.batchclient.embeddedinproccluster.BatchClientTestHelper.writeEvents;
 import static org.junit.Assert.assertEquals;
-import static org.example.pravega.client.batchclient.embeddedinproccluster.BatchClientTestHelper.*;
 
 @Slf4j
 public class BatchClientTests {
@@ -73,18 +80,18 @@ public class BatchClientTests {
 
         if (isTlsEnabled) {
             builder.enableTls(true)
-                    .keyFile(absolutePathOfFileInClasspath("pravega/standalone/key.pem"))
-                    .certFile(absolutePathOfFileInClasspath("pravega/standalone/cert.pem"))
-                    .jksKeyFile(absolutePathOfFileInClasspath("pravega/standalone/standalone.keystore.jks"))
-                    .jksTrustFile(absolutePathOfFileInClasspath("pravega/standalone/standalone.truststore.jks"))
-                    .keyPasswordFile(absolutePathOfFileInClasspath("pravega/standalone/standalone.keystore.jks.passwd"));
+                    .keyFile(StandaloneServerTlsConstants.SERVER_KEY_LOCATION)
+                    .certFile(StandaloneServerTlsConstants.SERVER_CERT_LOCATION)
+                    .jksKeyFile(StandaloneServerTlsConstants.SERVER_KEYSTORE_LOCATION)
+                    .jksTrustFile(StandaloneServerTlsConstants.TRUSTSTORE_LOCATION)
+                    .keyPasswordFile(StandaloneServerTlsConstants.SERVER_KEYSTORE_PWD_LOCATION);
         }
 
         if (isAuthEnabled) {
             builder.enableAuth(true)
                     .userName("admin")
                     .passwd("1111_aaaa")
-                    .passwdFile(absolutePathOfFileInClasspath("pravega/standalone/passwd"));
+                    .passwdFile(StandaloneServerTlsConstants.SERVER_PASSWD_LOCATION);
         }
 
         inProcCluster = builder.build();
@@ -121,7 +128,7 @@ public class BatchClientTests {
                 .controllerURI(controllerUri());
 
         if (isTlsEnabled) {
-            builder.trustStore(absolutePathOfFileInClasspath("cert.pem"))
+            builder.trustStore(StandaloneServerTlsConstants.CA_CERT_LOCATION)
                     .validateHostName(false);
         }
         if (isAuthEnabled) {
@@ -162,7 +169,7 @@ public class BatchClientTests {
 
 
         @Cleanup
-        ClientFactory clientFactory = ClientFactory.withScope(scopeName, clientConfig);
+        EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(scopeName, clientConfig);
         EventStreamWriter<String> writer = clientFactory.createEventWriter(streamName, new JavaSerializer<String>(),
                 EventWriterConfig.builder().build());
 

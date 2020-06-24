@@ -1,15 +1,16 @@
 package org.example.pravega.client.basicreadwrite.tlsenabled;
 
 import io.pravega.client.ClientConfig;
-import io.pravega.client.ClientFactory;
+import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.JavaSerializer;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
-import org.example.pravega.common.FileUtils;
-import org.example.pravega.client.driver.utilities.Utils;
+import org.example.pravega.shared.PathUtils;
+import org.example.pravega.shared.StandaloneServerTlsConstants;
+import org.example.pravega.shared.Utils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,7 +36,7 @@ public class TlsReaderWriterExample {
 
         ClientConfig clientConfig = ClientConfig.builder()
                 .controllerURI(controllerURI)
-                .trustStore(FileUtils.absolutePathOfFileInClasspath("cert.pem"))
+                .trustStore(StandaloneServerTlsConstants.CA_CERT_LOCATION)
                 .validateHostName(false)
                 .build();
 
@@ -52,7 +53,7 @@ public class TlsReaderWriterExample {
         Assert.assertTrue("Failed to create the stream ", isStreamCreated);
 
         @Cleanup
-        ClientFactory clientFactory = ClientFactory.withScope(scope, clientConfig);
+        EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(scope, clientConfig);
 
         // Write an event to the stream.
 

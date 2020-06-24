@@ -42,7 +42,4 @@ public class Connection {
 
         this.clientConfig = clientConfigBuilder.build();
     }
-
-
-
 }

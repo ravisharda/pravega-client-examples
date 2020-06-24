@@ -1,4 +1,4 @@
-package org.example.pravega.client.driver.utilities;
+package org.example.pravega.shared;
 
 public class Utils {
 

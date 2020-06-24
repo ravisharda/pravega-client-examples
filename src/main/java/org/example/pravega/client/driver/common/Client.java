@@ -8,7 +8,7 @@ import java.net.URI;
 @Accessors(fluent = true) @Getter
 public class Client {
 
-    private final Connection connection;
+    private final org.example.pravega.client.driver.common.Connection connection;
 
     public Client(String scope, String streamName, URI controllerURI) {
         this.connection = new Connection(scope, streamName, controllerURI);

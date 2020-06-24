@@ -1,13 +1,14 @@
 package org.example.pravega.client.basicreadwrite.tlsenabled;
 
 import io.pravega.client.ClientConfig;
-import io.pravega.client.ClientFactory;
+import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.JavaSerializer;
 import lombok.Cleanup;
-import org.example.pravega.common.FileUtils;
+import org.example.pravega.shared.PathUtils;
+import org.example.pravega.shared.StandaloneServerTlsConstants;
 
 import java.net.URI;
 import java.util.UUID;
@@ -26,7 +27,7 @@ public class TlsReaderExample {
 
         ClientConfig clientConfig = ClientConfig.builder()
                 .controllerURI(controllerURI)
-                .trustStore(FileUtils.absolutePathOfFileInClasspath("cert.pem"))
+                .trustStore(StandaloneServerTlsConstants.CA_CERT_LOCATION)
                 .validateHostName(false)
                 .build();
 
@@ -54,7 +55,7 @@ public class TlsReaderExample {
         readerGroupManager.createReaderGroup(readerGroup, readerGroupConfig);
 
         @Cleanup
-        ClientFactory clientFactory = ClientFactory.withScope(scope, clientConfig);
+        EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(scope, clientConfig);
 
         @Cleanup
         EventStreamReader<String> reader = clientFactory.createReader("reader",

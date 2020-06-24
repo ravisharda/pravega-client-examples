@@ -1,7 +1,7 @@
 package org.example.pravega.client.basicreadwrite.authenabled;
 
 import io.pravega.client.ClientConfig;
-import io.pravega.client.ClientFactory;
+import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.*;
@@ -9,7 +9,7 @@ import io.pravega.client.stream.impl.DefaultCredentials;
 import io.pravega.client.stream.impl.JavaSerializer;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
-import org.example.pravega.client.driver.utilities.Utils;
+import org.example.pravega.shared.Utils;
 import org.junit.Test;
 
 import java.net.URI;
@@ -54,7 +54,7 @@ public class AuthReaderWriterExample {
         log.info("Created a stream with name [{}]", streamName);
 
         @Cleanup
-        ClientFactory clientFactory = ClientFactory.withScope(scope, clientConfig);
+        EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(scope, clientConfig);
 
         @Cleanup
         EventStreamWriter<String> writer = clientFactory.createEventWriter(streamName,

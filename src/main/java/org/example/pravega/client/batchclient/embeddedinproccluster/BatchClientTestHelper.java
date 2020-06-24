@@ -3,19 +3,14 @@ package org.example.pravega.client.batchclient.embeddedinproccluster;
 import com.google.common.collect.Lists;
 import io.pravega.client.BatchClientFactory;
 import io.pravega.client.ClientConfig;
-import io.pravega.client.ClientFactory;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.batch.SegmentIterator;
 import io.pravega.client.batch.SegmentRange;
-import io.pravega.client.netty.impl.ConnectionFactory;
-import io.pravega.client.netty.impl.ConnectionFactoryImpl;
 import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.ControllerImpl;
-import io.pravega.client.stream.impl.ControllerImplConfig;
 import io.pravega.client.stream.impl.JavaSerializer;
 import io.pravega.common.hash.RandomFactory;
-import junit.framework.TestCase;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,7 +23,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static io.pravega.shared.segment.StreamSegmentNameUtils.computeSegmentId;
+import static io.pravega.shared.NameUtils.computeSegmentId;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -67,7 +62,7 @@ class BatchClientTestHelper {
 
 
         @Cleanup
-        ClientFactory clientFactory = ClientFactory.withScope(scopeName, clientConfig);
+        EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(scopeName, clientConfig);
         EventStreamWriter<String> writer = clientFactory.createEventWriter(streamName, new JavaSerializer<String>(),
                 EventWriterConfig.builder().build());
 

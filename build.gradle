@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'idea'
 }
 
 group 'org.example.pravega'
@@ -12,18 +13,12 @@ repositories {
     mavenCentral()
 }
 
-allprojects {
-    apply plugin: "idea"
-    apply plugin: "eclipse"
-}
-
 dependencies {
-    // https://projectlombok.org
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     //annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     compile "io.pravega:pravega-client:${pravegaVersion}+",
-            "io.pravega:pravega-common:${pravegaVersion}+",
+            "io.pravega:pravega-shared:${pravegaVersion}+",
             "io.pravega:pravega-standalone:${pravegaVersion}+",
             "commons-cli:commons-cli:${commonsCLIVersion}",
             "org.slf4j:slf4j-api:${slf4jApiVersion}",

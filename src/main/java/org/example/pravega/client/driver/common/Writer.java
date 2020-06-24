@@ -1,6 +1,6 @@
 package org.example.pravega.client.driver.common;
 
-import io.pravega.client.ClientFactory;
+import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.EventStreamWriter;
 import io.pravega.client.stream.EventWriterConfig;
@@ -40,7 +40,7 @@ public class Writer extends Client {
         final boolean streamIsNew = streamManager.createStream(conn.scope(),
                 conn.streamName(), streamConfig);
 
-        try (ClientFactory clientFactory = ClientFactory.withScope(conn.scope(),
+        try (EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(conn.scope(),
                 conn.clientConfig());
              EventStreamWriter<String> writer = clientFactory.createEventWriter(conn.streamName(),
                      new JavaSerializer<String>(),

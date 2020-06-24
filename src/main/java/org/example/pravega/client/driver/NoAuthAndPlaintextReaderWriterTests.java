@@ -5,7 +5,7 @@ import org.example.pravega.client.driver.common.Reader;
 import org.example.pravega.client.driver.common.Writer;
 import org.junit.Test;
 
-import org.example.pravega.client.driver.utilities.EnvironmentProperties;
+import org.example.pravega.shared.EnvironmentProperties;
 
 import java.net.URI;
 

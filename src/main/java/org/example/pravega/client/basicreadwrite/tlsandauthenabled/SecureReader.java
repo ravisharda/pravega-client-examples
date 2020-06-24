@@ -1,7 +1,6 @@
 package org.example.pravega.client.basicreadwrite.tlsandauthenabled;
 
 import io.pravega.client.ClientConfig;
-import io.pravega.client.ClientFactory;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
 import io.pravega.client.stream.*;
@@ -23,7 +22,7 @@ public class SecureReader {
         // Everything below depicts the usual flow of reading events. All client-side security configuration is
         // done through the ClientConfig object as shown above.
 
-        ClientFactory clientFactory = null;
+        EventStreamClientFactory clientFactory = null;
         ReaderGroupManager readerGroupManager = null;
         EventStreamReader<String> reader = null;
         try {
@@ -38,7 +37,7 @@ public class SecureReader {
             readerGroupManager.createReaderGroup(Constants.READER_GROUP_NAME, readerGroupConfig);
             System.out.println("Done creating a reader group with specified name  and config.");
 
-            clientFactory = ClientFactory.withScope(Constants.SCOPE, clientConfig);
+            clientFactory = EventStreamClientFactory.withScope(Constants.SCOPE, clientConfig);
             System.out.println("Done creating a client factory with the specified scope and client config.");
 
             reader = EventStreamClientFactory.withScope(Constants.SCOPE, clientConfig)

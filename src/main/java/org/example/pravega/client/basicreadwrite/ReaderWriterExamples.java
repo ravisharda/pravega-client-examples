@@ -1,7 +1,6 @@
 package org.example.pravega.client.basicreadwrite;
 
 import io.pravega.client.ClientConfig;
-import io.pravega.client.ClientFactory;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
 import io.pravega.client.admin.StreamManager;
@@ -10,7 +9,8 @@ import io.pravega.client.stream.impl.DefaultCredentials;
 import io.pravega.client.stream.impl.JavaSerializer;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
-import org.example.pravega.client.driver.utilities.Utils;
+import org.example.pravega.shared.StandaloneServerTlsConstants;
+import org.example.pravega.shared.Utils;
 import org.junit.Test;
 
 import java.net.URI;
@@ -21,7 +21,8 @@ import static org.junit.Assert.assertEquals;
 @Slf4j
 public class ReaderWriterExamples {
     private static final String CONTROLLER_HOST = "localhost";
-    private static final String TRUSTSTORE_PATH = "/path/to/ca-or-server-certificate";
+    private static final String TRUSTSTORE_PATH = StandaloneServerTlsConstants.CA_CERT_LOCATION;
+            // "/path/to/ca-or-server-certificate";
 
     @Test
     public void writeAndReadEventWithTlsAndAuthEnabled() {
@@ -29,7 +30,7 @@ public class ReaderWriterExamples {
         String streamName = "stream1";
 
         int numSegments = 1;
-        URI controllerURI = controlerUri(true);
+        URI controllerURI = controlerUri(false);
 
         ClientConfig clientConfig = ClientConfig.builder()
                 .controllerURI(controllerURI)
@@ -137,7 +138,7 @@ public class ReaderWriterExamples {
         log.info("Created a stream with name [{}]", streamName);
 
         @Cleanup
-        ClientFactory clientFactory = ClientFactory.withScope(scope, clientConfig);
+        EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(scope, clientConfig);
 
         @Cleanup
         EventStreamWriter<String> writer = clientFactory.createEventWriter(streamName,
@@ -252,8 +253,6 @@ public class ReaderWriterExamples {
                 .stream(Stream.of(scope, stream2))
                 .disableAutomaticCheckpoints()
                 .build());
-
-
 
         @Cleanup
         EventStreamReader<String> reader1 = clientFactory.createReader("readerId", readerGroup1,

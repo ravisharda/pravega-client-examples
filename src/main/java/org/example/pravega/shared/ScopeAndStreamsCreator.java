@@ -1,4 +1,4 @@
-package org.example.pravega.common;
+package org.example.pravega.shared;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -6,7 +6,6 @@ import io.pravega.client.ClientConfig;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.ScalingPolicy;
 import io.pravega.client.stream.StreamConfiguration;
-import io.pravega.client.stream.impl.Credentials;
 
 import lombok.extern.slf4j.Slf4j;
 

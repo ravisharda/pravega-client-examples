@@ -1,7 +1,7 @@
 package org.example.pravega.client.basicreadwrite.tlsenabled;
 
 import io.pravega.client.ClientConfig;
-import io.pravega.client.ClientFactory;
+import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.EventStreamWriter;
 import io.pravega.client.stream.EventWriterConfig;
@@ -9,7 +9,8 @@ import io.pravega.client.stream.ScalingPolicy;
 import io.pravega.client.stream.StreamConfiguration;
 import io.pravega.client.stream.impl.JavaSerializer;
 import lombok.Cleanup;
-import org.example.pravega.common.FileUtils;
+import org.example.pravega.shared.PathUtils;
+import org.example.pravega.shared.StandaloneServerTlsConstants;
 
 import java.net.URI;
 
@@ -23,7 +24,7 @@ public class TlsWriterExample {
 
         ClientConfig clientConfig = ClientConfig.builder()
                 .controllerURI(controllerURI)
-                .trustStore(FileUtils.absolutePathOfFileInClasspath("cert2.pem"))
+                .trustStore(StandaloneServerTlsConstants.CA_CERT_LOCATION)
                 .validateHostName(false)
                 .build();
         System.out.println("Done creating client config");
@@ -41,7 +42,7 @@ public class TlsWriterExample {
         System.out.println("Created stream: " + streamName);
 
         @Cleanup
-        ClientFactory clientFactory = ClientFactory.withScope(scope, clientConfig);
+        EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(scope, clientConfig);
 
         @Cleanup
         EventStreamWriter<String> writer = clientFactory.createEventWriter(streamName,

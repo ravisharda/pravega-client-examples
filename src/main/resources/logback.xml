@@ -21,18 +21,16 @@
         </encoder>
     </appender>
 
-    <root level="TRACE">
-        <appender-ref ref="FILE"/>
+    <root level="error">
+        <appender-ref ref="STDOUT"/>
+        <!--<appender-ref ref="FILE"/>-->
     </root>
 
-    <logger name="org.example.pravega" level="INFO">
-        <appender-ref ref="STDOUT"/>
-    </logger>
-
-    <logger name="io.netty" level="TRACE"/>
-    <logger name="io.grpc" level="TRACE"/>
-    <logger name="org.apache.zookeeper" level="TRACE"/>
-    <logger name="org.apache.curator" level="TRACE"/>
-    <logger name="io.pravega" level="TRACE"/>
+    <logger name="org.apache.zookeeper" level="error"/>
+    <logger name="org.apache.curator" level="error"/>
+    <logger name="io.grpc.netty" level="error"/>
+    <logger name="io.netty" level="error"/>
+    <logger name="io.pravega.client" level="error"/>
+    <logger name="org.example.pravega" level="debug"/>
 
 </configuration>

@@ -1,6 +1,6 @@
 package org.example.pravega.client.driver.common;
 
-import io.pravega.client.ClientFactory;
+import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.*;
@@ -48,7 +48,7 @@ public class Reader extends Client {
             readerGroupManager.createReaderGroup(readerGroup, readerGroupConfig);
         }
 
-        try (ClientFactory clientFactory = ClientFactory.withScope(conn.scope(), conn.clientConfig());
+        try (EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(conn.scope(), conn.clientConfig());
              EventStreamReader<String> reader = clientFactory.createReader("reader",
                      readerGroup,
                      new JavaSerializer<String>(),

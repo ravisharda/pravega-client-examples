@@ -22,7 +22,7 @@ public class Constants {
     static {
         READER_GROUP_NAME = UUID.randomUUID().toString().replace("-", "");
         try {
-            TRUSTSTORE_PATH = Paths.get(Constants.class.getClassLoader().getResource("cert.pem").toURI())
+            TRUSTSTORE_PATH = Paths.get(Constants.class.getClassLoader().getResource("ca-cert.crt").toURI())
                     .toAbsolutePath().toString();
         } catch (URISyntaxException e) {
             e.printStackTrace();

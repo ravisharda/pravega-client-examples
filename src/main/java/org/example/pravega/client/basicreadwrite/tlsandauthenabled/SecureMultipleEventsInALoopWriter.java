@@ -1,7 +1,6 @@
 package org.example.pravega.client.basicreadwrite.tlsandauthenabled;
 
 import io.pravega.client.ClientConfig;
-import io.pravega.client.ClientFactory;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.EventStreamWriter;
@@ -26,7 +25,7 @@ public class SecureMultipleEventsInALoopWriter {
         System.out.println("Done creating client config.");
 
         StreamManager streamManager = null;
-        ClientFactory clientFactory = null;
+        EventStreamClientFactory clientFactory = null;
         EventStreamWriter<String> writer = null;
 
         try {
@@ -45,7 +44,7 @@ public class SecureMultipleEventsInALoopWriter {
             System.out.println("Done creating a stream with the specified name: [" + Constants.STREAM_NAME
                     + "] and stream configuration.");
 
-            clientFactory = ClientFactory.withScope(Constants.SCOPE, clientConfig);
+            clientFactory = EventStreamClientFactory.withScope(Constants.SCOPE, clientConfig);
             System.out.println("Done creating a client factory with the specified scope and client config.");
 
             writer = EventStreamClientFactory.withScope(Constants.SCOPE, clientConfig)
