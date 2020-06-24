@@ -3,7 +3,6 @@ package org.example.pravega.client.driver;
 import lombok.extern.slf4j.Slf4j;
 import org.example.pravega.client.driver.common.Reader;
 import org.example.pravega.client.driver.common.Writer;
-import org.example.pravega.shared.PathUtils;
 import org.example.pravega.shared.StandaloneServerTlsConstants;
 import org.junit.Test;
 import org.example.pravega.shared.EnvironmentProperties;
