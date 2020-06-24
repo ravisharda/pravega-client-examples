@@ -7,7 +7,6 @@ import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.JavaSerializer;
 import lombok.Cleanup;
-import org.example.pravega.shared.PathUtils;
 import org.example.pravega.shared.StandaloneServerTlsConstants;
 
 import java.net.URI;
