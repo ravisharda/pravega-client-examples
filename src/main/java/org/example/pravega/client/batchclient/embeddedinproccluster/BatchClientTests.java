@@ -11,8 +11,7 @@ import io.pravega.client.admin.StreamManager;
 import io.pravega.client.batch.SegmentIterator;
 import io.pravega.client.batch.SegmentRange;
 import io.pravega.client.batch.impl.SegmentRangeImpl;
-import io.pravega.client.netty.impl.ConnectionFactory;
-import io.pravega.client.netty.impl.ConnectionFactoryImpl;
+import io.pravega.client.connection.impl.ConnectionFactory;
 import io.pravega.client.segment.impl.Segment;
 import io.pravega.client.stream.Checkpoint;
 import io.pravega.client.stream.EventStreamWriter;
@@ -175,7 +174,7 @@ public class BatchClientTests {
 
         // Create the gRPC client proxy, that we'll use for scaling the streams
         @Cleanup
-        ConnectionFactory connectionFactory = new ConnectionFactoryImpl(clientConfig);
+        ConnectionFactory connectionFactory = null; //= new ConnectionFactoryImpl(clientConfig);
         ControllerImpl controller = new ControllerImpl(
                 ControllerImplConfig.builder().clientConfig(clientConfig).build(),
                 connectionFactory.getInternalExecutor());
@@ -247,7 +246,7 @@ public class BatchClientTests {
                 , streamName, streamConfig);
 
         @Cleanup
-        ConnectionFactory connectionFactory = new ConnectionFactoryImpl(clientConfig);
+        ConnectionFactory connectionFactory = null; //= new ConnectionFactoryImpl(clientConfig);
         log.info("Done creating connectionFactory");
 
         // Create the gRPC client proxy
@@ -345,7 +344,7 @@ public class BatchClientTests {
 
         // Create the gRPC client proxy, that we'll use for scaling the streams
         @Cleanup
-        ConnectionFactory connectionFactory = new ConnectionFactoryImpl(clientConfig);
+        ConnectionFactory connectionFactory = null; // new ConnectionFactoryImpl(clientConfig);
         ControllerImpl controller = new ControllerImpl(
                 ControllerImplConfig.builder().clientConfig(clientConfig).build(),
                 connectionFactory.getInternalExecutor());
@@ -393,7 +392,7 @@ public class BatchClientTests {
 
         // Create the gRPC client proxy, that we'll use for scaling the streams
         @Cleanup
-        ConnectionFactory connectionFactory = new ConnectionFactoryImpl(clientConfig);
+        ConnectionFactory connectionFactory = null; // new ConnectionFactoryImpl(clientConfig);
         ControllerImpl controller = new ControllerImpl(
                 ControllerImplConfig.builder().clientConfig(clientConfig).build(),
                 connectionFactory.getInternalExecutor());
