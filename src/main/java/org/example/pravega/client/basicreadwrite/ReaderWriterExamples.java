@@ -30,7 +30,7 @@ public class ReaderWriterExamples {
         String streamName = "stream1";
 
         int numSegments = 1;
-        URI controllerURI = controlerUri(false);
+        URI controllerURI = controlerUri(true);
 
         ClientConfig clientConfig = ClientConfig.builder()
                 .controllerURI(controllerURI)
