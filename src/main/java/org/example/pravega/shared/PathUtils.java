@@ -9,16 +9,11 @@ import java.net.URL;
 import java.nio.file.Paths;
 
 @Slf4j
-public class PathUtils {
-
-    public static String absolutePathOfFileInClasspath2(String str) {
-        return null;
-    }
+class PathUtils {
 
     @SneakyThrows
     public static String locationFromClasspath(@NonNull String fileLocation) {
-
-        URL url = Resources.getResource("pravega/standalone/ca-cert.crt");
+        URL url = Resources.getResource(fileLocation);
         if (url == null) {
             return null;
         } else {

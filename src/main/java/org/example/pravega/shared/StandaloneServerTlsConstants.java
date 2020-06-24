@@ -18,7 +18,7 @@ public class StandaloneServerTlsConstants {
 
     private static final String SERVER_KEYSTORE_PWD_FILE_NAME = "server.keystore.jks.passwd";
 
-    private static final String TRUSTSTORE_FILE_NAME = "client.keystore.jks";
+    private static final String TRUSTSTORE_FILE_NAME = "client.truststore.jks";
 
     private static final String SERVER_PASSWD_FILE_NAME = "passwd";
 
