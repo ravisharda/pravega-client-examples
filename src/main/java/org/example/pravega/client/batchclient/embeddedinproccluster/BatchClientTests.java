@@ -12,6 +12,8 @@ import io.pravega.client.batch.SegmentIterator;
 import io.pravega.client.batch.SegmentRange;
 import io.pravega.client.batch.impl.SegmentRangeImpl;
 import io.pravega.client.connection.impl.ConnectionFactory;
+import io.pravega.client.control.impl.ControllerImpl;
+import io.pravega.client.control.impl.ControllerImplConfig;
 import io.pravega.client.segment.impl.Segment;
 import io.pravega.client.stream.Checkpoint;
 import io.pravega.client.stream.EventStreamWriter;
@@ -24,8 +26,6 @@ import io.pravega.client.stream.Stream;
 import io.pravega.client.stream.StreamConfiguration;
 import io.pravega.client.stream.StreamCut;
 import io.pravega.client.stream.impl.ClientFactoryImpl;
-import io.pravega.client.stream.impl.ControllerImpl;
-import io.pravega.client.stream.impl.ControllerImplConfig;
 import io.pravega.client.stream.impl.DefaultCredentials;
 import io.pravega.client.stream.impl.JavaSerializer;
 import io.pravega.client.stream.impl.StreamCutImpl;
@@ -256,7 +256,7 @@ public class BatchClientTests {
         log.info("Done creating controller proxy ControllerImpl");
 
         @Cleanup
-        ClientFactoryImpl clientFactory = new ClientFactoryImpl(scopeName, controller);
+        EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(scopeName, clientConfig);
         log.info("Done creating ClientFactoryImpl");
 
         @Cleanup
