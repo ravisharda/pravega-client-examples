@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
-    //annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     compile "io.pravega:pravega-client:${pravegaVersion}+",
             "io.pravega:pravega-standalone:${pravegaVersion}+",
@@ -24,5 +24,6 @@ dependencies {
             "ch.qos.logback:logback-classic:${logbackVersion}",
             "org.glassfish.jersey.core:jersey-client:${jerseyClientVersion}",
             "javax.activation:activation:1.1.1",
-            "junit:junit:${junitVersion}"
+            "junit:junit:${junitVersion}",
+            "io.netty:netty-transport:4.1.50.Final"
 }
